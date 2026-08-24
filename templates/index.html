@@ -1,0 +1,390 @@
+<!DOCTYPE html>
+
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Wallatrack - My Searches</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+          darkMode: "class",
+          theme: {
+            extend: {
+              "colors": {
+                      "on-surface-variant": "#3d494a",
+                      "secondary-fixed-dim": "#c1c6d7",
+                      "inverse-surface": "#2d3133",
+                      "inverse-primary": "#62d7e2",
+                      "on-tertiary-fixed": "#07006c",
+                      "secondary-fixed": "#dde2f3",
+                      "primary": "#00666e",
+                      "on-primary": "#ffffff",
+                      "secondary-container": "#dde2f3",
+                      "secondary": "#585e6c",
+                      "tertiary-fixed": "#e1e0ff",
+                      "tertiary-container": "#6063ee",
+                      "surface-container": "#eceef0",
+                      "on-error-container": "#93000a",
+                      "on-background": "#191c1e",
+                      "error-container": "#ffdad6",
+                      "on-tertiary-container": "#fffbff",
+                      "surface-container-lowest": "#ffffff",
+                      "on-secondary-fixed": "#161c27",
+                      "primary-fixed": "#82f3ff",
+                      "primary-fixed-dim": "#62d7e2",
+                      "on-secondary-container": "#5e6473",
+                      "primary-container": "#00818a",
+                      "on-primary-fixed": "#002022",
+                      "on-secondary-fixed-variant": "#414754",
+                      "on-surface": "#191c1e",
+                      "error": "#ba1a1a",
+                      "surface": "#f7f9fb",
+                      "surface-bright": "#f7f9fb",
+                      "on-tertiary-fixed-variant": "#2f2ebe",
+                      "surface-tint": "#006970",
+                      "tertiary-fixed-dim": "#c0c1ff",
+                      "on-secondary": "#ffffff",
+                      "tertiary": "#4648d4",
+                      "on-primary-container": "#f5feff",
+                      "surface-variant": "#e0e3e5",
+                      "surface-dim": "#d8dadc",
+                      "on-error": "#ffffff",
+                      "background": "#f7f9fb",
+                      "inverse-on-surface": "#eff1f3",
+                      "surface-container-highest": "#e0e3e5",
+                      "surface-container-high": "#e6e8ea",
+                      "outline-variant": "#bcc9ca",
+                      "outline": "#6d797b",
+                      "on-tertiary": "#ffffff",
+                      "on-primary-fixed-variant": "#004f55",
+                      "surface-container-low": "#f2f4f6"
+              },
+              "borderRadius": {
+                      "DEFAULT": "0.25rem",
+                      "lg": "0.5rem",
+                      "xl": "0.75rem",
+                      "full": "9999px"
+              },
+              "spacing": {
+                      "gutter": "1.5rem",
+                      "stack-sm": "0.5rem",
+                      "container-max": "1440px",
+                      "card-padding": "1.25rem",
+                      "sidebar-width": "260px",
+                      "stack-md": "1rem",
+                      "section-gap": "2rem"
+              },
+              "fontFamily": {
+                      "body-lg": [
+                              "Inter"
+                      ],
+                      "label-md": [
+                              "Inter"
+                      ],
+                      "body-md": [
+                              "Inter"
+                      ],
+                      "label-sm": [
+                              "Inter"
+                      ],
+                      "headline-lg-mobile": [
+                              "Inter"
+                      ],
+                      "headline-lg": [
+                              "Inter"
+                      ],
+                      "headline-xl": [
+                              "Inter"
+                      ],
+                      "headline-md": [
+                              "Inter"
+                      ]
+              },
+              "fontSize": {
+                      "body-lg": [
+                              "16px",
+                              {
+                                      "lineHeight": "24px",
+                                      "fontWeight": "400"
+                              }
+                      ],
+                      "label-md": [
+                              "12px",
+                              {
+                                      "lineHeight": "16px",
+                                      "letterSpacing": "0.05em",
+                                      "fontWeight": "600"
+                              }
+                      ],
+                      "body-md": [
+                              "14px",
+                              {
+                                      "lineHeight": "20px",
+                                      "fontWeight": "400"
+                              }
+                      ],
+                      "label-sm": [
+                              "11px",
+                              {
+                                      "lineHeight": "14px",
+                                      "fontWeight": "500"
+                              }
+                      ],
+                      "headline-lg-mobile": [
+                              "20px",
+                              {
+                                      "lineHeight": "28px",
+                                      "fontWeight": "700"
+                              }
+                      ],
+                      "headline-lg": [
+                              "24px",
+                              {
+                                      "lineHeight": "32px",
+                                      "fontWeight": "600"
+                              }
+                      ],
+                      "headline-xl": [
+                              "32px",
+                              {
+                                      "lineHeight": "40px",
+                                      "fontWeight": "700"
+                              }
+                      ],
+                      "headline-md": [
+                              "20px",
+                              {
+                                      "lineHeight": "28px",
+                                      "fontWeight": "600"
+                              }
+                      ]
+              }
+      },
+          },
+        }
+      </script>
+<style>
+        body {
+            background-color: theme('colors.background');
+            color: theme('colors.on-background');
+        }
+    </style>
+</head>
+<body class="flex min-h-screen bg-background">
+<!-- TopAppBar Mobile -->
+<header class="md:hidden flex justify-between items-center px-gutter h-16 w-full bg-primary text-on-primary shadow-md fixed top-0 z-50">
+<div class="text-headline-lg-mobile font-headline-lg-mobile text-on-primary">Wallatrack</div>
+<button class="material-symbols-outlined hover:bg-primary-container/20 p-2 rounded-full transition-colors">menu</button>
+</header>
+<!-- SideNavBar (Desktop) -->
+<nav class="hidden md:flex flex-col py-stack-md bg-surface-container-low text-primary fixed left-0 top-0 bottom-0 w-[260px] border-r border-outline-variant z-40">
+<div class="px-gutter mb-8">
+<h1 class="text-headline-md font-headline-md text-primary">Wallatrack Pro</h1>
+<p class="text-label-sm font-label-sm text-on-surface-variant">Marketplace Monitor</p>
+</div>
+<div class="flex flex-col gap-1 flex-1">
+<a class="flex items-center px-4 py-3 text-on-surface-variant hover:bg-surface-container-highest transition-all mx-2 rounded-lg" href="#">
+<span class="material-symbols-outlined mr-3">dashboard</span>
+<span class="text-label-md font-label-md">Dashboard</span>
+</a>
+<a class="flex items-center px-4 py-3 bg-primary text-on-primary rounded-lg mx-2 border-l-4 border-primary-fixed-dim translate-x-1 duration-200" href="#">
+<span class="material-symbols-outlined mr-3">search</span>
+<span class="text-label-md font-label-md">Queries</span>
+</a>
+<a class="flex items-center px-4 py-3 text-on-surface-variant hover:bg-surface-container-highest transition-all mx-2 rounded-lg" href="#">
+<span class="material-symbols-outlined mr-3">inventory_2</span>
+<span class="text-label-md font-label-md">Items</span>
+</a>
+<a class="flex items-center px-4 py-3 text-on-surface-variant hover:bg-surface-container-highest transition-all mx-2 rounded-lg" href="#">
+<span class="material-symbols-outlined mr-3">fact_check</span>
+<span class="text-label-md font-label-md">Allowlist</span>
+</a>
+<a class="flex items-center px-4 py-3 text-on-surface-variant hover:bg-surface-container-highest transition-all mx-2 rounded-lg" href="#">
+<span class="material-symbols-outlined mr-3">settings</span>
+<span class="text-label-md font-label-md">Configuration</span>
+</a>
+<a class="flex items-center px-4 py-3 text-on-surface-variant hover:bg-surface-container-highest transition-all mx-2 rounded-lg" href="#">
+<span class="material-symbols-outlined mr-3">description</span>
+<span class="text-label-md font-label-md">Logs</span>
+</a>
+</div>
+<div class="px-gutter mb-6">
+<button class="w-full bg-primary text-on-primary py-2 rounded-lg text-label-md font-label-md hover:bg-primary-container transition-colors shadow-sm">New Search</button>
+</div>
+<div class="flex flex-col gap-1 mt-auto border-t border-outline-variant pt-4">
+<a class="flex items-center px-4 py-3 text-on-surface-variant hover:bg-surface-container-highest transition-all mx-2 rounded-lg" href="#">
+<span class="material-symbols-outlined mr-3">help</span>
+<span class="text-label-md font-label-md">Support</span>
+</a>
+<a class="flex items-center px-4 py-3 text-on-surface-variant hover:bg-surface-container-highest transition-all mx-2 rounded-lg" href="#">
+<span class="material-symbols-outlined mr-3">logout</span>
+<span class="text-label-md font-label-md">Sign Out</span>
+</a>
+</div>
+</nav>
+<!-- Main Content -->
+<main class="flex-1 md:ml-[260px] pt-20 md:pt-8 px-4 md:px-gutter pb-12 max-w-container-max mx-auto w-full">
+<!-- Header -->
+<header class="mb-8">
+<h2 class="text-headline-xl font-headline-xl text-on-surface mb-2">My Searches</h2>
+<p class="text-body-lg font-body-lg text-on-surface-variant">Manage your active marketplace tracking queries and configure new alerts.</p>
+</header>
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-section-gap">
+<!-- Left Column: Forms -->
+<div class="lg:col-span-12 flex flex-col gap-6">
+<!-- Add New Search Form -->
+<section class="bg-surface-container-lowest rounded-xl border border-surface-variant shadow-sm p-card-padding">
+<h3 class="text-headline-md font-headline-md text-on-surface border-b border-surface-variant pb-4 mb-6">Add New Search</h3>
+<form class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 items-end">
+<div class="col-span-1 md:col-span-2 lg:col-span-4">
+<label class="block text-label-md font-label-md text-on-surface-variant mb-1">Keywords</label>
+<input class="w-full rounded-md border-outline-variant bg-surface-container-lowest text-on-surface focus:border-primary focus:ring-1 focus:ring-primary placeholder:text-outline text-body-md font-body-md py-2 px-3 shadow-sm transition-shadow" placeholder="e.g. 'Sony A7IV', 'ThinkPad X1'" type="text"/>
+</div>
+<div>
+<label class="block text-label-md font-label-md text-on-surface-variant mb-1">Min Price (€)</label>
+<input class="w-full rounded-md border-outline-variant bg-surface-container-lowest text-on-surface focus:border-primary focus:ring-1 focus:ring-primary placeholder:text-outline text-body-md font-body-md py-2 px-3 shadow-sm transition-shadow" v-model.number="newSearch.min_price" placeholder="0" type="number"/>
+</div>
+<div>
+<label class="block text-label-md font-label-md text-on-surface-variant mb-1">Max Price (€)</label>
+<input class="w-full rounded-md border-outline-variant bg-surface-container-lowest text-on-surface focus:border-primary focus:ring-1 focus:ring-primary placeholder:text-outline text-body-md font-body-md py-2 px-3 shadow-sm transition-shadow" v-model.number="newSearch.max_price" placeholder="Any" type="number"/>
+</div>
+<div>
+<label class="block text-label-md font-label-md text-on-surface-variant mb-1">Max Distance (km)</label>
+<input class="w-full rounded-md border-outline-variant bg-surface-container-lowest text-on-surface focus:border-primary focus:ring-1 focus:ring-primary placeholder:text-outline text-body-md font-body-md py-2 px-3 shadow-sm transition-shadow" v-model.number="newSearch.max_price" placeholder="Any" type="number"/>
+</div>
+<div>
+<label class="block text-label-md font-label-md text-on-surface-variant mb-1">Platform</label>
+<select v-model="newSearch.platform" class="w-full rounded-md border-outline-variant bg-surface-container-lowest text-on-surface focus:border-primary focus:ring-1 focus:ring-primary text-body-md font-body-md py-2 px-3 shadow-sm transition-shadow">
+<option value="both">Both</option>
+<option value="wallapop">Wallapop</option>
+<option value="vinted">Vinted</option>
+</select>
+</div>
+<div class="col-span-1 md:col-span-2 lg:col-span-4 mt-2 flex justify-end">
+<button @click="addSearch" class="bg-primary text-on-primary px-6 py-2 rounded-lg text-label-md font-label-md hover:bg-primary-container transition-colors shadow-sm flex items-center gap-2" type="button">
+<span class="material-symbols-outlined text-[18px]">add</span>
+                                Add Search
+                            </button>
+</div>
+</form>
+</section>
+<!-- Quick Add via URL -->
+<section class="bg-surface-container-lowest rounded-xl border border-surface-variant shadow-sm p-card-padding">
+<h3 class="text-headline-md font-headline-md text-on-surface border-b border-surface-variant pb-4 mb-6">Quick Add via URL</h3>
+<div class="flex flex-col md:flex-row gap-4">
+<input class="flex-1 rounded-md border-outline-variant bg-surface-container-lowest text-on-surface focus:border-primary focus:ring-1 focus:ring-primary placeholder:text-outline text-body-md font-body-md py-2 px-3 shadow-sm transition-shadow" placeholder="Paste Wallapop or Vinted search URL here..." type="url"/>
+<button class="bg-surface text-primary border border-primary px-6 py-2 rounded-lg text-label-md font-label-md hover:bg-surface-container-high transition-colors shadow-sm whitespace-nowrap" type="button">
+                            Quick Add
+                        </button>
+</div>
+</section>
+</div>
+<!-- Active Searches Table -->
+<div class="lg:col-span-12">
+<section class="bg-surface-container-lowest rounded-xl border border-surface-variant shadow-sm overflow-hidden">
+<div class="p-card-padding border-b border-surface-variant flex justify-between items-center bg-surface-container-low/50">
+<h3 class="text-headline-md font-headline-md text-on-surface">Active Searches</h3>
+<span class="text-label-sm font-label-sm text-on-surface-variant bg-surface-variant px-2 py-1 rounded-md">{{ searches.length }} Active</span>
+</div>
+<div class="overflow-x-auto">
+<table class="w-full text-left border-collapse">
+<thead>
+<tr class="border-b border-surface-variant bg-surface-container-lowest">
+<th class="py-3 px-4 text-label-sm font-label-sm text-on-surface-variant uppercase tracking-wider">ID</th>
+<th class="py-3 px-4 text-label-sm font-label-sm text-on-surface-variant uppercase tracking-wider">Keywords</th>
+<th class="py-3 px-4 text-label-sm font-label-sm text-on-surface-variant uppercase tracking-wider">Price Range</th>
+<th class="py-3 px-4 text-label-sm font-label-sm text-on-surface-variant uppercase tracking-wider">Distance</th>
+<th class="py-3 px-4 text-label-sm font-label-sm text-on-surface-variant uppercase tracking-wider">Platform</th>
+<th class="py-3 px-4 text-label-sm font-label-sm text-on-surface-variant uppercase tracking-wider text-right">Actions</th>
+</tr>
+</thead>
+<tbody class="divide-y divide-surface-variant">
+<tr v-for="search in searches" :key="search.id" class="hover:bg-surface-container-lowest/50 transition-colors group">
+<td class="py-4 px-4 text-body-md font-body-md text-secondary">#{{ search.id }}</td>
+<td class="py-4 px-4 text-body-md font-body-md text-on-surface font-medium">{{ search.keywords }}</td>
+<td class="py-4 px-4 text-body-md font-body-md text-on-surface-variant">
+    <span v-if="search.min_price || search.max_price">€{{ search.min_price || 0 }} - €{{ search.max_price || 'Any' }}</span>
+    <span v-else>Any</span>
+</td>
+<td class="py-4 px-4 text-body-md font-body-md text-on-surface-variant">{{ search.distance_in_km ? search.distance_in_km + ' km' : 'Any' }}</td>
+<td class="py-4 px-4">
+<div class="flex gap-2">
+<span v-if="search.platform === 'wallapop' || search.platform === 'both'" class="inline-flex items-center gap-1 bg-[#E8F5E9] text-[#2E7D32] px-2 py-1 rounded text-label-sm font-label-sm border border-[#A5D6A7]">Wallapop</span>
+<span v-if="search.platform === 'vinted' || search.platform === 'both'" class="inline-flex items-center gap-1 bg-[#E1F5FE] text-[#0277BD] px-2 py-1 rounded text-label-sm font-label-sm border border-[#81D4FA]">Vinted</span>
+</div>
+</td>
+<td class="py-4 px-4 text-right">
+<button @click="deleteSearch(search.id)" class="text-error hover:bg-error-container/50 p-2 rounded-full transition-colors" title="Delete">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">delete</span>
+</button>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</section>
+</div>
+</div>
+</main>
+
+</div>
+<script>
+  const { createApp, ref, onMounted } = Vue
+
+  createApp({
+    setup() {
+      const searches = ref([])
+      const newSearch = ref({
+        keywords: '',
+        min_price: null,
+        max_price: null,
+        distance_in_km: null,
+        platform: 'both'
+      })
+
+      const fetchSearches = async () => {
+        const res = await fetch('/api/searches')
+        searches.value = await res.json()
+      }
+
+      const addSearch = async () => {
+        if (!newSearch.value.keywords) return alert('Keywords are required')
+        const res = await fetch('/api/searches', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(newSearch.value)
+        })
+        if (res.ok) {
+          await fetchSearches()
+          newSearch.value = { keywords: '', min_price: null, max_price: null, distance_in_km: null, platform: 'both' }
+        } else {
+          alert('Failed to add search')
+        }
+      }
+
+      const deleteSearch = async (id) => {
+        if (!confirm('Are you sure you want to delete this search?')) return
+        const res = await fetch(`/api/searches/${id}`, { method: 'DELETE' })
+        if (res.ok) {
+          await fetchSearches()
+        }
+      }
+
+      onMounted(() => {
+        fetchSearches()
+      })
+
+      return {
+        searches,
+        newSearch,
+        addSearch,
+        deleteSearch
+      }
+    }
+  }).mount('#app')
+</script>
+</body>
+</html>

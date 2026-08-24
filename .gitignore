@@ -1,0 +1,9 @@
+.env
+__pycache__/
+data/
+*.db
+*.sqlite
+.pytest_cache/
+.agent/
+Bkup/
+temp_vinted/

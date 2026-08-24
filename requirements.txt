@@ -1,0 +1,8 @@
+python-telegram-bot
+sqlalchemy
+requests
+beautifulsoup4
+curl_cffi
+
+fastapi
+uvicorn

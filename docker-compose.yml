@@ -1,0 +1,14 @@
+services:
+  findly:
+    build: .
+    image: uniextra/findly:latest
+    container_name: findly
+    init: true
+    restart: unless-stopped
+    environment:
+      - TELEGRAM_TOKEN=${TELEGRAM_TOKEN}
+      - ALLOWED_CHAT_IDS=${ALLOWED_CHAT_IDS}
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./data:/app/data
