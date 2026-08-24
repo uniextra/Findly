@@ -1,16 +1,11 @@
 import os
 from fastapi import FastAPI, HTTPException, Request
 from fastapi.responses import HTMLResponse
-from fastapi.templating import Jinja2Templates
-from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 from typing import Optional, List
 from database import SessionLocal, Search, SeenItem
 
 app = FastAPI(title="Findly Web UI")
-
-# Templates directory
-templates = Jinja2Templates(directory="templates")
 
 class SearchCreate(BaseModel):
     keywords: str
@@ -22,8 +17,9 @@ class SearchCreate(BaseModel):
     chat_id: Optional[int] = None
 
 @app.get("/", response_class=HTMLResponse)
-async def read_root(request: Request):
-    return templates.TemplateResponse("index.html", {"request": request})
+async def read_root():
+    with open("templates/index.html", "r", encoding="utf-8") as f:
+        return f.read()
 
 @app.get("/api/searches")
 def get_searches():
