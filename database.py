@@ -25,6 +25,7 @@ class Search(Base):
     distance_in_km = Column(Integer, nullable=True)
     platform = Column(String, default="both")
     created_at = Column(DateTime, default=datetime.utcnow)
+    last_checked_at = Column(DateTime, nullable=True)
 
     seen_items = relationship("SeenItem", back_populates="search", cascade="all, delete-orphan")
 
@@ -61,7 +62,13 @@ def init_db():
             conn.execute(text("ALTER TABLE searches ADD COLUMN platform VARCHAR DEFAULT 'both'"))
             print("Added platform column to searches table")
         except Exception:
-            # Column likely already exists
+            pass
+            
+        # Migration to add last_checked_at column
+        try:
+            conn.execute(text("ALTER TABLE searches ADD COLUMN last_checked_at DATETIME"))
+            print("Added last_checked_at column to searches table")
+        except Exception:
             pass
 
 def get_setting(key: str, default: str = "") -> str:

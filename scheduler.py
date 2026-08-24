@@ -1,6 +1,7 @@
 import asyncio
 import random
 import logging
+from datetime import datetime
 from telegram.ext import Application
 from telegram import InlineKeyboardMarkup, InlineKeyboardButton
 from database import SessionLocal, Search, SeenItem
@@ -168,6 +169,9 @@ async def check_updates(application: Application, queue: asyncio.Queue):
                         'parse_mode': 'HTML',
                         'reply_markup': reply_markup
                     })
+                    
+                search.last_checked_at = datetime.utcnow()
+                db.commit()
                         
             except Exception as e:
                 logger.error(f"Error processing search {search.id}: {e}")

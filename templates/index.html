@@ -130,6 +130,8 @@
                                     <th class="py-3 px-4">Price Range</th>
                                     <th class="py-3 px-4">Distance</th>
                                     <th class="py-3 px-4">Platform</th>
+                                    <th class="py-3 px-4">Added On</th>
+                                    <th class="py-3 px-4">Last Checked</th>
                                     <th class="py-3 px-4 text-right">Actions</th>
                                 </tr>
                             </thead>
@@ -148,6 +150,8 @@
                                             <span v-if="search.platform === 'vinted' || search.platform === 'both'" class="px-2 py-1 bg-blue-100 text-blue-700 text-xs font-semibold rounded border border-blue-200">Vinted</span>
                                         </div>
                                     </td>
+                                    <td class="py-3 px-4 text-gray-500 text-sm whitespace-nowrap">{{ formatDate(search.created_at) }}</td>
+                                    <td class="py-3 px-4 text-gray-500 text-sm whitespace-nowrap">{{ formatTime(search.last_checked_at) }}</td>
                                     <td class="py-3 px-4 text-right">
                                         <button @click="editSearch(search)" class="text-blue-600 hover:bg-blue-50 p-2 rounded-full transition-colors mr-1" title="Edit">
                                             <span class="material-symbols-outlined text-sm">edit</span>
@@ -230,6 +234,16 @@ createApp({
             } catch(e) {
                 console.log("Invalid URL", e);
             }
+        }
+
+        const formatDate = (dateStr) => {
+            if (!dateStr) return '-';
+            return new Date(dateStr).toLocaleDateString();
+        }
+
+        const formatTime = (dateStr) => {
+            if (!dateStr) return 'Never';
+            return new Date(dateStr).toLocaleString();
         }
 
         const fetchData = async () => {
@@ -317,6 +331,8 @@ createApp({
             formSearch,
             quickUrl,
             parseUrl,
+            formatDate,
+            formatTime,
             saveSearch,
             editSearch,
             cancelEdit,

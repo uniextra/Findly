@@ -83,7 +83,8 @@ def get_searches():
                 "distance_in_km": s.distance_in_km,
                 "platform": s.platform,
                 "chat_id": s.chat_id,
-                "created_at": s.created_at.isoformat() if s.created_at else None
+                "created_at": s.created_at.isoformat() if s.created_at else None,
+                "last_checked_at": s.last_checked_at.isoformat() if s.last_checked_at else None
             }
             for s in searches
         ]
