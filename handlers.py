@@ -1,7 +1,7 @@
 from telegram import Update
 from telegram.ext import ContextTypes
 from sqlalchemy.orm import Session
-from database import SessionLocal, Search
+from database import SessionLocal, Search, get_setting
 
 def get_db_session():
     return SessionLocal()
@@ -10,24 +10,21 @@ import os
 from functools import wraps
 
 def restricted(func):
+    """Decorator to restrict access to allowed user IDs."""
     @wraps(func)
     async def wrapped(update: Update, context: ContextTypes.DEFAULT_TYPE, *args, **kwargs):
-        chat_id = update.effective_chat.id
-        allowed_ids_str = os.environ.get("ALLOWED_CHAT_IDS", "")
+        allowed_chats_str = get_setting("allowed_chat_ids", "")
         
-        if allowed_ids_str:
-            try:
-                # Remove potential quotes from the string itself
-                clean_ids_str = allowed_ids_str.strip("'\"")
-                allowed_ids = {int(x.strip()) for x in clean_ids_str.split(",") if x.strip()}
-                if chat_id not in allowed_ids:
-                    logger.warning(f"Unauthorized access denied for chat_id {chat_id}.")
-                    return
-            except ValueError:
-                logger.error("ALLOWED_CHAT_IDS contains invalid integers.")
-                # If parsing fails, maybe log error but fail safe (deny to be safe)
-                return
-
+        # Parse the string into a list of integers, handling empty or invalid entries gracefully
+        try:
+            allowed_chats = [int(cid.strip("'\" ")) for cid in allowed_chats_str.split(',') if cid.strip()]
+        except ValueError:
+            allowed_chats = []
+            
+        chat_id = update.effective_chat.id
+        if chat_id not in allowed_chats:
+            await update.message.reply_text("⛔ No estás autorizado para usar este bot.")
+            return
         return await func(update, context, *args, **kwargs)
     return wrapped
 

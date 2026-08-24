@@ -38,7 +38,11 @@ class SeenItem(Base):
 
     search = relationship("Search", back_populates="seen_items")
 
+class AppSetting(Base):
+    __tablename__ = "app_settings"
 
+    key = Column(String, primary_key=True, index=True)
+    value = Column(String)
 
 def init_db():
     Base.metadata.create_all(bind=engine)
@@ -59,6 +63,17 @@ def init_db():
         except Exception:
             # Column likely already exists
             pass
+
+def get_setting(key: str, default: str = "") -> str:
+    db = SessionLocal()
+    try:
+        setting = db.query(AppSetting).filter(AppSetting.key == key).first()
+        if setting:
+            return setting.value
+        # Fallback to env
+        return os.environ.get(key.upper(), default)
+    finally:
+        db.close()
 
 def get_db():
     db = SessionLocal()
