@@ -21,6 +21,20 @@ async def post_init(application: Application):
     
     # Start the scanners
     asyncio.create_task(scheduler_loop(application, notification_queue))
+    
+    # Send startup message
+    allowed_chats = os.environ.get("ALLOWED_CHAT_IDS", "")
+    if allowed_chats:
+        chat_ids = [int(cid.strip("'\" ")) for cid in allowed_chats.split(',') if cid.strip()]
+        for chat_id in chat_ids:
+            try:
+                await application.bot.send_message(
+                    chat_id=chat_id, 
+                    text="🚀 <b>Findly Bot iniciado correctamente.</b>\nMonitoreo web y notificaciones activos.",
+                    parse_mode="HTML"
+                )
+            except Exception as e:
+                logger.error(f"Failed to send startup message to {chat_id}: {e}")
 
 def main():
     token = os.environ.get("TELEGRAM_TOKEN")
