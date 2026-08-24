@@ -74,6 +74,14 @@
 
             <!-- SEARCHES -->
             <div v-if="currentRoute === 'searches'" class="space-y-6">
+                <!-- Quick Add via URL -->
+                <div class="bg-white p-6 rounded-xl border border-gray-200 shadow-sm">
+                    <h3 class="text-lg font-semibold mb-4">Quick Add via URL</h3>
+                    <div class="flex flex-col md:flex-row gap-4">
+                        <input v-model="quickUrl" @input="parseUrl" class="flex-1 rounded-md border-gray-300 shadow-sm py-2 px-3 focus:border-primary focus:ring-primary" placeholder="Paste Wallapop or Vinted search URL here..." type="url">
+                    </div>
+                </div>
+
                 <!-- Add Form -->
                 <div class="bg-white p-6 rounded-xl border border-gray-200 shadow-sm">
                     <h3 class="text-lg font-semibold mb-4">{{ isEditing ? 'Edit Search' : 'Add New Tracking Query' }}</h3>
@@ -194,6 +202,35 @@ createApp({
         const isEditing = ref(false)
         const editingId = ref(null)
         const formSearch = ref({ keywords: '', min_price: null, max_price: null, distance_in_km: null, platform: 'both' })
+        const quickUrl = ref('')
+
+        const parseUrl = () => {
+            try {
+                if (!quickUrl.value) return;
+                const url = new URL(quickUrl.value);
+                
+                if (url.hostname.includes('wallapop')) {
+                    formSearch.value.platform = 'wallapop';
+                    formSearch.value.keywords = url.searchParams.get('keywords') || '';
+                    const minP = url.searchParams.get('min_sale_price');
+                    formSearch.value.min_price = minP ? parseFloat(minP) : null;
+                    const maxP = url.searchParams.get('max_sale_price');
+                    formSearch.value.max_price = maxP ? parseFloat(maxP) : null;
+                    const dist = url.searchParams.get('distance_in_km');
+                    formSearch.value.distance_in_km = dist ? parseInt(dist) : null;
+                } else if (url.hostname.includes('vinted')) {
+                    formSearch.value.platform = 'vinted';
+                    formSearch.value.keywords = url.searchParams.get('search_text') || '';
+                    const minP = url.searchParams.get('price_from');
+                    formSearch.value.min_price = minP ? parseFloat(minP) : null;
+                    const maxP = url.searchParams.get('price_to');
+                    formSearch.value.max_price = maxP ? parseFloat(maxP) : null;
+                    formSearch.value.distance_in_km = null;
+                }
+            } catch(e) {
+                console.log("Invalid URL", e);
+            }
+        }
 
         const fetchData = async () => {
             const [resStats, resSearches, resSettings] = await Promise.all([
@@ -235,6 +272,7 @@ createApp({
         const cancelEdit = () => {
             isEditing.value = false
             editingId.value = null
+            quickUrl.value = ''
             formSearch.value = { keywords: '', min_price: null, max_price: null, distance_in_km: null, platform: 'both' }
         }
 
@@ -277,6 +315,8 @@ createApp({
             settings,
             isEditing,
             formSearch,
+            quickUrl,
+            parseUrl,
             saveSearch,
             editSearch,
             cancelEdit,
