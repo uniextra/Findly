@@ -137,10 +137,8 @@ async def check_single_search(search_id: int, queue: asyncio.Queue, platform_ove
             vinted_url = f"https://www.vinted.{vinted_domain}/catalog?search_text={search.keywords}"
             
             summary_msg = (
-                f"⚠️ <b>Se han encontrado {new_items_count} artículos nuevos.</b>
-"
-                f"Solo se han mostrado los primeros {max_items_to_notify}.
-"
+                f"⚠️ <b>Se han encontrado {new_items_count} artículos nuevos.</b>\n"
+                f"Solo se han mostrado los primeros {max_items_to_notify}.\n"
             )
             if target_platform == "wallapop":
                  summary_msg += f"<a href='{web_url}'>Ver todos los resultados en Wallapop</a>"
