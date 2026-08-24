@@ -36,6 +36,10 @@ class SeenItem(Base):
     wallapop_id = Column(String, unique=True, index=True)
     search_id = Column(Integer, ForeignKey("searches.id"))
     found_at = Column(DateTime, default=datetime.utcnow)
+    
+    title = Column(String, nullable=True)
+    price = Column(Float, nullable=True)
+    url = Column(String, nullable=True)
 
     search = relationship("Search", back_populates="seen_items")
 
@@ -68,6 +72,15 @@ def init_db():
         try:
             conn.execute(text("ALTER TABLE searches ADD COLUMN last_checked_at DATETIME"))
             print("Added last_checked_at column to searches table")
+        except Exception:
+            pass
+
+        # Migrations for seen_items
+        try:
+            conn.execute(text("ALTER TABLE seen_items ADD COLUMN title VARCHAR"))
+            conn.execute(text("ALTER TABLE seen_items ADD COLUMN price FLOAT"))
+            conn.execute(text("ALTER TABLE seen_items ADD COLUMN url VARCHAR"))
+            print("Added title, price, url columns to seen_items table")
         except Exception:
             pass
 

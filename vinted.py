@@ -21,6 +21,7 @@ def search_vinted(keywords: str, min_price: Optional[float] = None, max_price: O
     params = {
         "search_text": keywords,
         "order": "newest_first",
+        "per_page": 50,
     }
     if min_price is not None:
         params["price_from"] = min_price
@@ -58,21 +59,41 @@ def search_vinted(keywords: str, min_price: Optional[float] = None, max_price: O
             response.raise_for_status()
             
             data = response.json()
-            items = data.get("items", [])
+            items = data.get("items", [])[:50]  # Hard limit to first 50 results
             
+            import time
             results = []
+            now_ts = int(time.time())
+            
             for item in items:
                 try:
+                    # Filter by timestamp (less than 20 minutes old)
+                    photo = item.get("photo", {})
+                    if photo:
+                        high_res = photo.get("high_resolution", {})
+                        timestamp = high_res.get("timestamp")
+                        if timestamp:
+                            if (now_ts - int(timestamp)) > 20 * 60:
+                                continue # Too old, skip it
+                    
                     item_id = item.get("id")
                     title = item.get("title")
                     
-                    price = float(item.get("price", 0))
-                    currency = item.get("currency", "EUR")
+                    price_data = item.get("price")
+                    if isinstance(price_data, dict):
+                        price = float(price_data.get("amount", 0))
+                        currency = price_data.get("currency_code", "EUR")
+                    else:
+                        # Fallback just in case Vinted changes back to string/float
+                        price = float(price_data or 0)
+                        currency = item.get("currency", "EUR")
                     
                     url_slug = item.get("url")
                     
                     images = item.get("photos", [])
                     image = images[0].get("url") if images else None
+                    if not image and photo:
+                        image = photo.get("url")
                     
                     if item_id and title:
                         results.append({

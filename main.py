@@ -5,7 +5,7 @@ import sys
 from telegram.ext import Application, CommandHandler, CallbackQueryHandler, MessageHandler, filters
 from database import init_db, get_setting
 from handlers import start, add_search, list_searches, delete_search, button_callback, handle_message
-from scheduler import scheduler_loop, telegram_notifier_loop
+from scheduler import platform_scheduler_loop, telegram_notifier_loop
 
 # Configure logging
 logging.basicConfig(
@@ -14,14 +14,17 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
+global_loop = None
+global_queue = None
+
 async def post_init(application: Application):
-    notification_queue = asyncio.Queue()
+    global global_loop, global_queue
+    global_loop = asyncio.get_running_loop()
+    global_queue = asyncio.Queue()
     
-    # Start the telegram notifier worker
-    asyncio.create_task(telegram_notifier_loop(application, notification_queue))
-    
-    # Start the scanners
-    asyncio.create_task(scheduler_loop(application, notification_queue))
+    asyncio.create_task(telegram_notifier_loop(application, global_queue))
+    asyncio.create_task(platform_scheduler_loop(global_queue, "wallapop"))
+    asyncio.create_task(platform_scheduler_loop(global_queue, "vinted"))
     
     # Send startup message
     allowed_chats = get_setting("allowed_chat_ids", "")

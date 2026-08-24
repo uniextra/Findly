@@ -20,7 +20,7 @@ class SettingUpdate(BaseModel):
     value: str
 
 @app.get("/", response_class=HTMLResponse)
-async def read_root():
+def read_root():
     with open("templates/index.html", "r", encoding="utf-8") as f:
         return f.read()
 
@@ -45,7 +45,9 @@ def get_stats():
 def get_settings():
     return {
         "telegram_token": get_setting("telegram_token", ""),
-        "allowed_chat_ids": get_setting("allowed_chat_ids", "")
+        "allowed_chat_ids": get_setting("allowed_chat_ids", ""),
+        "wallapop_interval": get_setting("wallapop_interval", "5"),
+        "vinted_interval": get_setting("vinted_interval", "5")
     }
 
 @app.post("/api/settings")
@@ -66,6 +68,27 @@ def save_settings(settings: List[SettingUpdate]):
     except Exception as e:
         db.rollback()
         raise HTTPException(status_code=500, detail=str(e))
+    finally:
+        db.close()
+
+@app.get("/api/items")
+def get_items():
+    db = SessionLocal()
+    try:
+        items = db.query(SeenItem).order_by(SeenItem.found_at.desc()).limit(200).all()
+        return [
+            {
+                "id": i.id,
+                "platform_id": i.wallapop_id,
+                "search_id": i.search_id,
+                "search_keywords": i.search.keywords if i.search else "Deleted Search",
+                "found_at": i.found_at.isoformat() if i.found_at else None,
+                "title": i.title,
+                "price": i.price,
+                "url": i.url
+            }
+            for i in items
+        ]
     finally:
         db.close()
 
@@ -142,6 +165,26 @@ def update_search(search_id: int, search: SearchCreate):
     except Exception as e:
         db.rollback()
         raise HTTPException(status_code=500, detail=str(e))
+    finally:
+        db.close()
+
+@app.post("/api/searches/{search_id}/refresh")
+def refresh_search(search_id: int):
+    import asyncio
+    from main import global_loop, global_queue
+    from scheduler import check_single_search
+    
+    if global_loop is None or global_queue is None:
+        raise HTTPException(status_code=500, detail="Bot is not running, cannot refresh.")
+        
+    db = SessionLocal()
+    try:
+        search = db.query(Search).filter(Search.id == search_id).first()
+        if not search:
+            raise HTTPException(status_code=404, detail="Search not found")
+            
+        asyncio.run_coroutine_threadsafe(check_single_search(search_id, global_queue), global_loop)
+        return {"success": True}
     finally:
         db.close()
 

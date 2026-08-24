@@ -74,7 +74,7 @@ def search_items(keywords: str, min_price: Optional[float] = None, max_price: Op
             
             # Parse new response structure
             try:
-                items = data.get("data", {}).get("section", {}).get("payload", {}).get("items", [])
+                items = data.get("data", {}).get("section", {}).get("payload", {}).get("items", [])[:50]
             except AttributeError:
                 items = []
             

@@ -22,6 +22,19 @@
           }
         }
     </script>
+
+<style>
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(-8px); }
+  50% { transform: translateX(8px); }
+  75% { transform: translateX(-8px); }
+}
+.animate-shake {
+  animation: shake 0.4s ease-in-out;
+}
+</style>
+
 </head>
 <body class="bg-gray-50 text-gray-900 font-sans h-screen flex overflow-hidden">
 <div id="app" class="flex w-full h-full">
@@ -39,6 +52,10 @@
             </a>
             <a @click="currentRoute = 'searches'" :class="currentRoute === 'searches' ? 'bg-primary text-white' : 'text-gray-600 hover:bg-gray-100'" class="flex items-center gap-3 px-4 py-3 rounded-lg cursor-pointer transition-colors">
                 <span class="material-symbols-outlined">manage_search</span> Searches
+            </a>
+            
+            <a @click="currentRoute = 'items'" :class="currentRoute === 'items' ? 'bg-primary text-white' : 'text-gray-600 hover:bg-gray-100'" class="flex items-center gap-3 px-4 py-3 rounded-lg cursor-pointer transition-colors">
+                <span class="material-symbols-outlined">list_alt</span> Seen Items
             </a>
             <a @click="currentRoute = 'settings'" :class="currentRoute === 'settings' ? 'bg-primary text-white' : 'text-gray-600 hover:bg-gray-100'" class="flex items-center gap-3 px-4 py-3 rounded-lg cursor-pointer transition-colors">
                 <span class="material-symbols-outlined">settings</span> Settings
@@ -83,32 +100,58 @@
                 </div>
 
                 <!-- Add Form -->
-                <div class="bg-white p-6 rounded-xl border border-gray-200 shadow-sm">
+                <div :class="{'animate-shake': shakeForm}" class="bg-white p-6 rounded-xl border border-gray-200 shadow-sm">
                     <h3 class="text-lg font-semibold mb-4">{{ isEditing ? 'Edit Search' : 'Add New Tracking Query' }}</h3>
                     <form class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
+                        
                         <div class="lg:col-span-2">
                             <label class="block text-sm font-medium text-gray-700 mb-1">Keywords</label>
                             <input v-model="formSearch.keywords" class="w-full rounded-md border-gray-300 shadow-sm py-2 px-3 focus:border-primary focus:ring-primary" placeholder="MacBook Pro M2..." type="text">
                         </div>
+                        
+                        
+                          <div class="lg:col-span-2">
+                              <div class="flex justify-between mb-3">
+                                  <label class="block text-sm font-medium text-gray-700">Price Range</label>
+                                  <span class="text-sm text-gray-500 font-medium">€{{ actualMinPrice }} - {{ actualMaxPrice >= 2000 ? 'Any' : '€' + actualMaxPrice }}</span>
+                              </div>
+                              <div class="relative w-full h-8 flex items-center">
+                                  <div class="absolute w-full h-2 bg-gray-200 rounded-lg"></div>
+                                  <div class="absolute h-2 bg-primary rounded-lg" :style="{ left: (minPriceIndex / 28 * 100) + '%', width: ((maxPriceIndex - minPriceIndex) / 28 * 100) + '%' }"></div>
+                                  <input type="range" v-model.number="minPriceIndex" @input="enforceMinMax" min="0" max="28" step="1" class="absolute w-full appearance-none bg-transparent pointer-events-none [&::-webkit-slider-thumb]:pointer-events-auto [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-5 [&::-webkit-slider-thumb]:h-5 [&::-webkit-slider-thumb]:bg-primary [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:cursor-pointer z-10">
+                                  <input type="range" v-model.number="maxPriceIndex" @input="enforceMinMax" min="0" max="28" step="1" class="absolute w-full appearance-none bg-transparent pointer-events-none [&::-webkit-slider-thumb]:pointer-events-auto [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-5 [&::-webkit-slider-thumb]:h-5 [&::-webkit-slider-thumb]:bg-primary [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:cursor-pointer z-20">
+                              </div>
+                          </div>
+
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Min Price (€)</label>
-                            <input v-model.number="formSearch.min_price" class="w-full rounded-md border-gray-300 shadow-sm py-2 px-3 focus:border-primary focus:ring-primary" placeholder="0" type="number">
+                            <div class="flex justify-between mb-3">
+                                <label class="block text-sm font-medium text-gray-700">Max Distance</label>
+                                <span class="text-sm text-gray-500 font-medium">{{ distanceLabel }}</span>
+                            </div>
+                            <div class="relative w-full h-8 flex items-center">
+                                <input v-model.number="formSearch.distance_index" type="range" min="0" max="3" step="1" class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-primary">
+                            </div>
+                            <div class="flex justify-between text-xs text-gray-400 mt-1 px-1">
+                                <span>5km</span>
+                                <span>10km</span>
+                                <span>30km</span>
+                                <span>Any</span>
+                            </div>
                         </div>
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Max Price (€)</label>
-                            <input v-model.number="formSearch.max_price" class="w-full rounded-md border-gray-300 shadow-sm py-2 px-3 focus:border-primary focus:ring-primary" placeholder="Any" type="number">
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Max Distance (km)</label>
-                            <input v-model.number="formSearch.distance_in_km" class="w-full rounded-md border-gray-300 shadow-sm py-2 px-3 focus:border-primary focus:ring-primary" placeholder="Any" type="number">
-                        </div>
-                        <div class="lg:col-span-2">
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Platform</label>
-                            <select v-model="formSearch.platform" class="w-full rounded-md border-gray-300 shadow-sm py-2 px-3 focus:border-primary focus:ring-primary">
-                                <option value="both">Both (Wallapop & Vinted)</option>
-                                <option value="wallapop">Wallapop Only</option>
-                                <option value="vinted">Vinted Only</option>
-                            </select>
+                        <div class="lg:col-span-2 flex flex-col justify-center">
+                            <label class="block text-sm font-medium text-gray-700 mb-3">Platforms</label>
+                            <div class="flex gap-6">
+                                <label class="inline-flex items-center cursor-pointer">
+                                  <input type="checkbox" v-model="formSearch.wallapop" class="sr-only peer">
+                                  <div class="relative w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-green-500"></div>
+                                  <span class="ms-3 text-sm font-medium text-gray-700">Wallapop</span>
+                                </label>
+                                <label class="inline-flex items-center cursor-pointer">
+                                  <input type="checkbox" v-model="formSearch.vinted" class="sr-only peer">
+                                  <div class="relative w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-500"></div>
+                                  <span class="ms-3 text-sm font-medium text-gray-700">Vinted</span>
+                                </label>
+                            </div>
                         </div>
                         <div class="lg:col-span-3 flex justify-end items-end gap-2">
                             <button v-if="isEditing" @click="cancelEdit" type="button" class="px-6 py-2 rounded-lg text-gray-700 border border-gray-300 hover:bg-gray-50 transition-colors">Cancel</button>
@@ -146,13 +189,16 @@
                                     <td class="py-3 px-4 text-gray-600">{{ search.distance_in_km ? search.distance_in_km + ' km' : 'Any' }}</td>
                                     <td class="py-3 px-4">
                                         <div class="flex gap-1">
-                                            <span v-if="search.platform === 'wallapop' || search.platform === 'both'" class="px-2 py-1 bg-green-100 text-green-700 text-xs font-semibold rounded border border-green-200">Wallapop</span>
-                                            <span v-if="search.platform === 'vinted' || search.platform === 'both'" class="px-2 py-1 bg-blue-100 text-blue-700 text-xs font-semibold rounded border border-blue-200">Vinted</span>
+                                            <a :href="getWallapopUrl(search)" target="_blank" v-if="search.platform === 'wallapop' || search.platform === 'both'" class="px-2 py-1 bg-green-100 text-green-700 text-xs font-semibold rounded border border-green-200 hover:bg-green-200 transition-colors">Wallapop</a>
+                                            <a :href="getVintedUrl(search)" target="_blank" v-if="search.platform === 'vinted' || search.platform === 'both'" class="px-2 py-1 bg-blue-100 text-blue-700 text-xs font-semibold rounded border border-blue-200 hover:bg-blue-200 transition-colors">Vinted</a>
                                         </div>
                                     </td>
                                     <td class="py-3 px-4 text-gray-500 text-sm whitespace-nowrap">{{ formatDate(search.created_at) }}</td>
                                     <td class="py-3 px-4 text-gray-500 text-sm whitespace-nowrap">{{ formatTime(search.last_checked_at) }}</td>
                                     <td class="py-3 px-4 text-right">
+                                        <button @click="refreshSearch(search.id)" class="text-green-600 hover:bg-green-50 p-2 rounded-full transition-colors mr-1" title="Refresh Now">
+                                            <span class="material-symbols-outlined text-sm">refresh</span>
+                                        </button>
                                         <button @click="editSearch(search)" class="text-blue-600 hover:bg-blue-50 p-2 rounded-full transition-colors mr-1" title="Edit">
                                             <span class="material-symbols-outlined text-sm">edit</span>
                                         </button>
@@ -167,26 +213,83 @@
                 </div>
             </div>
 
+            
+            <!-- ITEMS -->
+            <div v-if="currentRoute === 'items'" class="space-y-6">
+                <div class="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left border-collapse">
+                            <thead>
+                                <tr class="bg-gray-50 border-b border-gray-200 text-sm font-semibold text-gray-600">
+                                    <th class="py-3 px-4">ID</th>
+                                    <th class="py-3 px-4">Search Keywords</th>
+                                    <th class="py-3 px-4">Item Title</th>
+                                    <th class="py-3 px-4">Price</th>
+                                    <th class="py-3 px-4">Found At</th>
+                                    <th class="py-3 px-4">Link</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-gray-200">
+                                <tr v-for="item in items" :key="item.id" class="hover:bg-gray-50 transition-colors">
+                                    <td class="py-3 px-4 text-gray-500 text-sm">#{{ item.id }}</td>
+                                    <td class="py-3 px-4 text-sm font-medium">{{ item.search_keywords }}</td>
+                                    <td class="py-3 px-4 text-sm">{{ item.title || 'Unknown' }}</td>
+                                    <td class="py-3 px-4 text-sm">{{ item.price ? '€'+item.price : '-' }}</td>
+                                    <td class="py-3 px-4 text-sm text-gray-500">{{ formatTime(item.found_at) }}</td>
+                                    <td class="py-3 px-4 text-sm">
+                                        <a v-if="item.url" :href="item.url" target="_blank" class="text-primary hover:underline">View Item</a>
+                                        <span v-else class="text-gray-400">-</span>
+                                    </td>
+                                </tr>
+                                <tr v-if="items.length === 0">
+                                    <td colspan="6" class="py-6 text-center text-gray-500">No items found yet.</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
             <!-- SETTINGS -->
-            <div v-if="currentRoute === 'settings'" class="max-w-2xl bg-white p-6 rounded-xl border border-gray-200 shadow-sm">
-                <h3 class="text-lg font-semibold mb-6">Bot Configuration</h3>
-                <form class="space-y-6">
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Telegram Bot Token</label>
-                        <input v-model="settings.telegram_token" type="password" class="w-full rounded-md border-gray-300 shadow-sm py-2 px-3 focus:border-primary focus:ring-primary" placeholder="123456:ABC-DEF1234ghIkl-zyx57W2v1u123ew11">
-                        <p class="text-xs text-gray-500 mt-1">Token generated by BotFather in Telegram.</p>
+            <div v-if="currentRoute === 'settings'" class="max-w-2xl space-y-6 pb-12">
+                <!-- Telegram Config Box -->
+                <div class="bg-white p-6 rounded-xl border border-gray-200 shadow-sm">
+                    <h3 class="text-lg font-semibold mb-6 flex items-center gap-2 text-gray-800"><span class="material-symbols-outlined text-primary">forum</span> Telegram Configuration</h3>
+                    <div class="space-y-6">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Telegram Bot Token</label>
+                            <input v-model="settings.telegram_token" type="password" class="w-full rounded-md border-gray-300 shadow-sm py-2 px-3 focus:border-primary focus:ring-primary" placeholder="123456:ABC-DEF1234ghIkl-zyx57W2v1u123ew11">
+                            <p class="text-xs text-gray-500 mt-1">Token generated by BotFather in Telegram.</p>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Allowed Chat IDs (Comma separated)</label>
+                            <input v-model="settings.allowed_chat_ids" type="text" class="w-full rounded-md border-gray-300 shadow-sm py-2 px-3 focus:border-primary focus:ring-primary" placeholder="123456789, 987654321">
+                            <p class="text-xs text-gray-500 mt-1">Users or groups allowed to use the bot and receive notifications.</p>
+                        </div>
                     </div>
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Allowed Chat IDs (Comma separated)</label>
-                        <input v-model="settings.allowed_chat_ids" type="text" class="w-full rounded-md border-gray-300 shadow-sm py-2 px-3 focus:border-primary focus:ring-primary" placeholder="123456789, 987654321">
-                        <p class="text-xs text-gray-500 mt-1">Users or groups allowed to use the bot and receive notifications.</p>
+                </div>
+
+                <!-- Scraping Intervals Box -->
+                <div class="bg-white p-6 rounded-xl border border-gray-200 shadow-sm">
+                    <h3 class="text-lg font-semibold mb-6 flex items-center gap-2 text-gray-800"><span class="material-symbols-outlined text-primary">schedule</span> Scraping Intervals</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Wallapop Check Interval (minutes)</label>
+                            <input v-model="settings.wallapop_interval" type="number" min="1" class="w-full rounded-md border-gray-300 shadow-sm py-2 px-3 focus:border-primary focus:ring-primary" placeholder="5">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Vinted Check Interval (minutes)</label>
+                            <input v-model="settings.vinted_interval" type="number" min="1" class="w-full rounded-md border-gray-300 shadow-sm py-2 px-3 focus:border-primary focus:ring-primary" placeholder="5">
+                        </div>
                     </div>
-                    <div class="flex justify-end pt-4 border-t border-gray-200">
-                        <button @click="saveSettings" type="button" class="bg-primary text-white px-6 py-2 rounded-lg font-medium hover:bg-[#005a62] transition-colors shadow-sm">
-                            Save & Restart Bot
-                        </button>
-                    </div>
-                </form>
+                </div>
+                
+                <!-- Save Button Box -->
+                <div class="flex justify-end pt-2">
+                    <button @click="saveSettings" type="button" class="bg-primary text-white px-8 py-3 rounded-lg font-medium hover:bg-[#005a62] transition-colors shadow-sm text-base flex items-center gap-2">
+                        <span class="material-symbols-outlined text-[20px]">save</span> Save & Restart Bot
+                    </button>
+                </div>
             </div>
 
         </div>
@@ -203,33 +306,106 @@ createApp({
         const searches = ref([])
         const settings = ref({ telegram_token: '', allowed_chat_ids: '' })
         
+        
+        const shakeForm = ref(false)
+        const triggerShake = () => {
+            shakeForm.value = false;
+            setTimeout(() => {
+                shakeForm.value = true;
+                setTimeout(() => shakeForm.value = false, 400);
+            }, 10);
+        }
+
         const isEditing = ref(false)
         const editingId = ref(null)
-        const formSearch = ref({ keywords: '', min_price: null, max_price: null, distance_in_km: null, platform: 'both' })
+        const formSearch = ref({ keywords: '', min_price: 0, max_price: 2000, distance_index: 3, wallapop: true, vinted: true })
+
+        const items = ref([])
+
+        const priceSteps = [0, 5, 15, 30, 50, 75, 105, 140, 180, 225, 275, 330, 390, 455, 525, 600, 680, 765, 855, 950, 1050, 1155, 1265, 1380, 1500, 1625, 1755, 1890, 2030];
+        
+        const minPriceIndex = ref(0);
+        const maxPriceIndex = ref(28);
+
+        const actualMinPrice = Vue.computed(() => priceSteps[minPriceIndex.value]);
+        const actualMaxPrice = Vue.computed(() => priceSteps[maxPriceIndex.value]);
+
+        const getIndexForPrice = (p) => {
+            if (p == null || p >= 2000) return 28;
+            let closest = 0;
+            let minDiff = Infinity;
+            for(let i=0; i<priceSteps.length; i++) {
+                const diff = Math.abs(priceSteps[i] - p);
+                if(diff < minDiff) { minDiff = diff; closest = i; }
+            }
+            return closest;
+        }
+
+        const enforceMinMax = () => {
+            if (minPriceIndex.value > maxPriceIndex.value) {
+                // Swap them or bound them. We will bound them
+                if (minPriceIndex.value > maxPriceIndex.value) {
+                    minPriceIndex.value = maxPriceIndex.value;
+                }
+            }
+        }
+
+
+        
+        const distanceMap = [5, 10, 30, null];
+        const distanceLabel = Vue.computed(() => {
+            const val = distanceMap[formSearch.value.distance_index];
+            return val ? val + ' km' : 'Any';
+        });
+
+
+        const getWallapopUrl = (s) => {
+            let u = new URL('https://es.wallapop.com/search');
+            u.searchParams.set('keywords', s.keywords);
+            u.searchParams.set('order_by', 'newest');
+            u.searchParams.set('time_filter', 'today');
+            if (s.min_price) u.searchParams.set('min_sale_price', s.min_price);
+            if (s.max_price) u.searchParams.set('max_sale_price', s.max_price);
+            if (s.distance_in_km) u.searchParams.set('distance_in_km', s.distance_in_km);
+            return u.toString();
+        }
+
+        const getVintedUrl = (s) => {
+            let u = new URL('https://www.vinted.es/catalog');
+            u.searchParams.set('search_text', s.keywords);
+            u.searchParams.set('order', 'newest_first');
+            if (s.min_price) u.searchParams.set('price_from', s.min_price);
+            if (s.max_price) u.searchParams.set('price_to', s.max_price);
+            return u.toString();
+        }
+
         const quickUrl = ref('')
 
         const parseUrl = () => {
+            triggerShake();
             try {
                 if (!quickUrl.value) return;
                 const url = new URL(quickUrl.value);
                 
                 if (url.hostname.includes('wallapop')) {
-                    formSearch.value.platform = 'wallapop';
+                    formSearch.value.wallapop = true;
+                    formSearch.value.vinted = false;
                     formSearch.value.keywords = url.searchParams.get('keywords') || '';
                     const minP = url.searchParams.get('min_sale_price');
-                    formSearch.value.min_price = minP ? parseFloat(minP) : null;
+                    minPriceIndex.value = getIndexForPrice(minP ? parseFloat(minP) : 0);
                     const maxP = url.searchParams.get('max_sale_price');
-                    formSearch.value.max_price = maxP ? parseFloat(maxP) : null;
+                    maxPriceIndex.value = getIndexForPrice(maxP ? parseFloat(maxP) : 2000);
                     const dist = url.searchParams.get('distance_in_km');
                     formSearch.value.distance_in_km = dist ? parseInt(dist) : null;
                 } else if (url.hostname.includes('vinted')) {
-                    formSearch.value.platform = 'vinted';
+                    formSearch.value.wallapop = false;
+                    formSearch.value.vinted = true;
                     formSearch.value.keywords = url.searchParams.get('search_text') || '';
                     const minP = url.searchParams.get('price_from');
-                    formSearch.value.min_price = minP ? parseFloat(minP) : null;
+                    minPriceIndex.value = getIndexForPrice(minP ? parseFloat(minP) : 0);
                     const maxP = url.searchParams.get('price_to');
-                    formSearch.value.max_price = maxP ? parseFloat(maxP) : null;
-                    formSearch.value.distance_in_km = null;
+                    maxPriceIndex.value = getIndexForPrice(maxP ? parseFloat(maxP) : 2000);
+                    formSearch.value.distance_index = 3;
                 }
             } catch(e) {
                 console.log("Invalid URL", e);
@@ -247,26 +423,46 @@ createApp({
         }
 
         const fetchData = async () => {
-            const [resStats, resSearches, resSettings] = await Promise.all([
+            
+            const [resStats, resSearches, resSettings, resItems] = await Promise.all([
                 fetch('/api/stats').then(r => r.json()),
                 fetch('/api/searches').then(r => r.json()),
-                fetch('/api/settings').then(r => r.json())
+                fetch('/api/settings').then(r => r.json()),
+                fetch('/api/items').then(r => r.json())
             ])
             stats.value = resStats
             searches.value = resSearches
             settings.value = resSettings
+            items.value = resItems
+
         }
 
         const saveSearch = async () => {
             if (!formSearch.value.keywords) return alert('Keywords are required')
+            if (!formSearch.value.wallapop && !formSearch.value.vinted) return alert('Select at least one platform')
             
+            let platformStr = 'both';
+            if (formSearch.value.wallapop && !formSearch.value.vinted) platformStr = 'wallapop';
+            if (!formSearch.value.wallapop && formSearch.value.vinted) platformStr = 'vinted';
+
+            const pMin = priceSteps[minPriceIndex.value];
+            const pMax = priceSteps[maxPriceIndex.value];
+            
+            const payload = {
+                keywords: formSearch.value.keywords,
+                min_price: pMin > 0 ? pMin : null,
+                max_price: pMax >= 2000 ? null : pMax,
+                distance_in_km: distanceMap[formSearch.value.distance_index],
+                platform: platformStr
+            }
+
             const method = isEditing.value ? 'PUT' : 'POST'
             const url = isEditing.value ? `/api/searches/${editingId.value}` : '/api/searches'
             
             const res = await fetch(url, {
                 method: method,
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(formSearch.value)
+                body: JSON.stringify(payload)
             })
             
             if (res.ok) {
@@ -277,17 +473,38 @@ createApp({
             }
         }
 
+        
+        
+        
         const editSearch = (search) => {
+            triggerShake();
             isEditing.value = true
             editingId.value = search.id
-            formSearch.value = { ...search }
+            
+            let dIndex = 3;
+            if (search.distance_in_km === 5) dIndex = 0;
+            else if (search.distance_in_km === 10) dIndex = 1;
+            else if (search.distance_in_km === 30) dIndex = 2;
+
+            minPriceIndex.value = getIndexForPrice(search.min_price || 0);
+            maxPriceIndex.value = getIndexForPrice(search.max_price || 2000);
+
+            formSearch.value = {
+                keywords: search.keywords,
+                distance_index: dIndex,
+                wallapop: search.platform === 'both' || search.platform === 'wallapop',
+                vinted: search.platform === 'both' || search.platform === 'vinted'
+            }
         }
+
+
+
 
         const cancelEdit = () => {
             isEditing.value = false
             editingId.value = null
             quickUrl.value = ''
-            formSearch.value = { keywords: '', min_price: null, max_price: null, distance_in_km: null, platform: 'both' }
+            formSearch.value = { keywords: '', distance_index: 3, wallapop: true, vinted: true }; minPriceIndex.value = 0; maxPriceIndex.value = 28;
         }
 
         const deleteSearch = async (id) => {
@@ -296,10 +513,22 @@ createApp({
             if (res.ok) await fetchData()
         }
 
+        const refreshSearch = async (id) => {
+            const res = await fetch(`/api/searches/${id}/refresh`, { method: 'POST' })
+            if (res.ok) {
+                alert('Manual check triggered! Results will be sent to Telegram shortly.')
+                await fetchData()
+            } else {
+                alert('Failed to trigger refresh. Is the bot running?')
+            }
+        }
+
         const saveSettings = async () => {
             const payload = [
                 { key: 'telegram_token', value: settings.value.telegram_token },
-                { key: 'allowed_chat_ids', value: settings.value.allowed_chat_ids }
+                { key: 'allowed_chat_ids', value: settings.value.allowed_chat_ids },
+                { key: 'wallapop_interval', value: String(settings.value.wallapop_interval) },
+                { key: 'vinted_interval', value: String(settings.value.vinted_interval) }
             ]
             const res = await fetch('/api/settings', {
                 method: 'POST',
@@ -307,7 +536,7 @@ createApp({
                 body: JSON.stringify(payload)
             })
             if (res.ok) {
-                alert('Settings saved. The bot will restart to apply the new token.')
+                alert('Settings saved. The bot will restart to apply the new settings.')
                 await fetchData()
             } else {
                 alert('Failed to save settings')
@@ -327,16 +556,27 @@ createApp({
             stats,
             searches,
             settings,
+            shakeForm,
             isEditing,
             formSearch,
             quickUrl,
             parseUrl,
             formatDate,
             formatTime,
+            getWallapopUrl,
+            getVintedUrl,
+            minPriceIndex,
+            maxPriceIndex,
+            actualMinPrice,
+            actualMaxPrice,
+            enforceMinMax,
+            distanceLabel,
+            items,
             saveSearch,
             editSearch,
             cancelEdit,
             deleteSearch,
+            refreshSearch,
             saveSettings
         }
     }
