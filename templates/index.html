@@ -331,7 +331,7 @@ createApp({
                 select_country: "Selecciona el país para adaptar las búsquedas.",
                 wallapop_interval: "Intervalo Wallapop (min)", vinted_interval: "Intervalo Vinted (min)",
                 telegram_config: "Configuración Telegram", telegram_token: "Token del Bot", allowed_chat_ids: "IDs de Chat Permitidos",
-                comma_separated_ids: "IDs separados por coma", save_settings: "Guardar Ajustes"
+                comma_separated_ids: "IDs separados por coma", save_settings: "Guardar Ajustes", add_chat_id: "Añadir Chat ID", auto_obtain_id: "Auto-Obtener ID", manual_enter_id: "Introducir Manualmente", enter_chat_id: "Introduce el Chat ID", confirm: "Confirmar", send_code_to_bot: "Envía este código al bot en Telegram:", expires_in: "Caduca en", code_expired: "El código ha caducado. Inténtalo de nuevo.", chat_added_success: "¡Chat añadido con éxito!"
             },
             fr: {
                 dashboard: "Tableau de bord", searches: "Recherches", settings: "Paramètres",
@@ -347,7 +347,7 @@ createApp({
                 select_country: "Sélectionnez le pays pour adapter les recherches.",
                 wallapop_interval: "Intervalle Wallapop (min)", vinted_interval: "Intervalle Vinted (min)",
                 telegram_config: "Configuration Telegram", telegram_token: "Token du Bot", allowed_chat_ids: "IDs de Chat Autorisés",
-                comma_separated_ids: "IDs séparés par des virgules", save_settings: "Enregistrer Paramètres"
+                comma_separated_ids: "IDs séparés par des virgules", save_settings: "Enregistrer Paramètres", add_chat_id: "Ajouter ID Chat", auto_obtain_id: "Obtenir Automatiquement", manual_enter_id: "Saisir Manuellement", enter_chat_id: "Saisir ID Chat", confirm: "Confirmer", send_code_to_bot: "Envoyez ce code au bot sur Telegram:", expires_in: "Expire dans", code_expired: "Le code a expiré. Veuillez réessayer.", chat_added_success: "Chat ajouté avec succès !"
             },
             it: {
                 dashboard: "Pannello", searches: "Ricerche", settings: "Impostazioni",
@@ -363,7 +363,7 @@ createApp({
                 select_country: "Seleziona il paese per adattare le ricerche.",
                 wallapop_interval: "Intervallo Wallapop (min)", vinted_interval: "Intervallo Vinted (min)",
                 telegram_config: "Configurazione Telegram", telegram_token: "Token del Bot", allowed_chat_ids: "ID Chat Consentiti",
-                comma_separated_ids: "ID separati da virgola", save_settings: "Salva Impostazioni"
+                comma_separated_ids: "ID separati da virgola", save_settings: "Salva Impostazioni", add_chat_id: "Aggiungi ID Chat", auto_obtain_id: "Ottieni Automaticamente", manual_enter_id: "Inserisci Manualmente", enter_chat_id: "Inserisci ID Chat", confirm: "Conferma", send_code_to_bot: "Invia questo codice al bot su Telegram:", expires_in: "Scade in", code_expired: "Codice scaduto. Riprova.", chat_added_success: "Chat aggiunta con successo!"
             },
             pt: {
                 dashboard: "Painel", searches: "Pesquisas", settings: "Configurações",
@@ -379,7 +379,7 @@ createApp({
                 select_country: "Seleciona o país para adaptar as pesquisas.",
                 wallapop_interval: "Intervalo Wallapop (min)", vinted_interval: "Intervalo Vinted (min)",
                 telegram_config: "Configuração Telegram", telegram_token: "Token do Bot", allowed_chat_ids: "IDs de Chat Permitidos",
-                comma_separated_ids: "IDs separados por vírgula", save_settings: "Guardar Configurações"
+                comma_separated_ids: "IDs separados por vírgula", save_settings: "Guardar Configurações", add_chat_id: "Adicionar ID de Chat", auto_obtain_id: "Obter Automaticamente", manual_enter_id: "Inserir Manualmente", enter_chat_id: "Inserir ID de Chat", confirm: "Confirmar", send_code_to_bot: "Envia este código ao bot no Telegram:", expires_in: "Expira em", code_expired: "O código expirou. Tenta novamente.", chat_added_success: "Chat adicionado com sucesso!"
             },
             en: {
                 dashboard: "Dashboard", searches: "Searches", settings: "Settings",
@@ -395,7 +395,7 @@ createApp({
                 select_country: "Select the country to adapt platform search domains.",
                 wallapop_interval: "Wallapop Interval (mins)", vinted_interval: "Vinted Interval (mins)",
                 telegram_config: "Telegram Configuration", telegram_token: "Telegram Bot Token", allowed_chat_ids: "Allowed Chat IDs",
-                comma_separated_ids: "Comma separated IDs", save_settings: "Save Settings"
+                comma_separated_ids: "Comma separated IDs", save_settings: "Save Settings", add_chat_id: "Add Chat ID", auto_obtain_id: "Auto-Obtain ID", manual_enter_id: "Enter Manually", enter_chat_id: "Enter Chat ID", confirm: "Confirm", send_code_to_bot: "Send this code to the bot on Telegram:", expires_in: "Expires in", code_expired: "The code expired. Please try again.", chat_added_success: "Chat added successfully!"
             }
         }
         
@@ -485,6 +485,66 @@ createApp({
             if (s.min_price) u.searchParams.set('price_from', s.min_price);
             if (s.max_price) u.searchParams.set('price_to', s.max_price);
             return u.toString();
+        }
+
+
+        const showPairingModal = ref(false)
+        const pairingMode = ref('select')
+        const manualChatId = ref('')
+        const pairingCode = ref('')
+        const pairingTimeLeft = ref(0)
+        let pairingInterval = null
+
+        const openPairingModal = () => {
+            pairingMode.value = 'select'
+            manualChatId.value = ''
+            showPairingModal.value = true
+        }
+        const closePairingModal = () => {
+            showPairingModal.value = false
+            if(pairingInterval) clearInterval(pairingInterval)
+        }
+        const addChatIdToSettings = (id) => {
+            let current = []
+            if (settings.value.allowed_chat_ids) {
+                current = settings.value.allowed_chat_ids.split(',').map(s=>s.trim()).filter(s=>s)
+            }
+            if(!current.includes(String(id))) {
+                current.push(String(id))
+                settings.value.allowed_chat_ids = current.join(',')
+            }
+        }
+        const confirmManualChatId = () => {
+            if(manualChatId.value) {
+                addChatIdToSettings(manualChatId.value)
+                closePairingModal()
+            }
+        }
+        const startAutoPairing = async () => {
+            pairingMode.value = 'auto'
+            const res = await fetch('/api/pairing/generate', {method: 'POST'})
+            const data = await res.json()
+            pairingCode.value = data.code
+            pairingTimeLeft.value = 50
+            
+            if(pairingInterval) clearInterval(pairingInterval)
+            pairingInterval = setInterval(async () => {
+                pairingTimeLeft.value--
+                if(pairingTimeLeft.value <= 0) {
+                    clearInterval(pairingInterval)
+                    pairingMode.value = 'select'
+                    alert(t('code_expired'))
+                    return
+                }
+                const statusRes = await fetch(`/api/pairing/status?code=${pairingCode.value}`)
+                const statusData = await statusRes.json()
+                if(statusData.status === 'success') {
+                    clearInterval(pairingInterval)
+                    addChatIdToSettings(statusData.chat_id)
+                    closePairingModal()
+                    alert(t('chat_added_success'))
+                }
+            }, 1000)
         }
 
         const quickUrl = ref('')
@@ -673,6 +733,15 @@ createApp({
             parseUrl,
             formatDate,
             formatTime,
+            openPairingModal,
+            showPairingModal,
+            pairingMode,
+            manualChatId,
+            pairingCode,
+            pairingTimeLeft,
+            closePairingModal,
+            confirmManualChatId,
+            startAutoPairing,
             getWallapopUrl,
             getVintedUrl,
             minPriceIndex,

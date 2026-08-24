@@ -5,6 +5,7 @@ from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 from typing import Optional, List, Dict
 from database import SessionLocal, Search, SeenItem, AppSetting, get_setting
+from pairing import generate_code, get_code_status
 
 app = FastAPI(title="Findly Web UI")
 app.mount("/static", StaticFiles(directory="static"), name="static")
@@ -25,6 +26,15 @@ class SettingUpdate(BaseModel):
 def read_root():
     with open("templates/index.html", "r", encoding="utf-8") as f:
         return f.read()
+
+@app.post("/api/pairing/generate")
+def api_generate_code():
+    code = generate_code()
+    return {"code": code}
+
+@app.get("/api/pairing/status")
+def api_pairing_status(code: str):
+    return get_code_status(code)
 
 @app.get("/api/stats")
 def get_stats():

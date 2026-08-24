@@ -23,7 +23,8 @@ translations = {
         "view_wallapop_all": "Ver todos los resultados en Wallapop",
         "view_vinted_all": "Ver todos los resultados en Vinted",
         "view_wallapop": "Ver en Wallapop",
-        "view_vinted": "Ver en Vinted"
+        "view_vinted": "Ver en Vinted",
+        "chat_paired": "✅ Chat enlazado correctamente. Puedes cerrar la ventana en la web."
     },
     "en": {
         "bot_started": "🚀 <b>Findly Bot started successfully.</b>\nWeb monitoring and notifications active.",
@@ -49,7 +50,8 @@ translations = {
         "view_wallapop_all": "View all results on Wallapop",
         "view_vinted_all": "View all results on Vinted",
         "view_wallapop": "View on Wallapop",
-        "view_vinted": "View on Vinted"
+        "view_vinted": "View on Vinted",
+        "chat_paired": "✅ Chat paired successfully. You can close the window on the web."
     },
     "fr": {
         "bot_started": "🚀 <b>Findly Bot démarré avec succès.</b>\nSurveillance web et notifications actives.",
@@ -75,7 +77,8 @@ translations = {
         "view_wallapop_all": "Voir tous les résultats sur Wallapop",
         "view_vinted_all": "Voir tous les résultats sur Vinted",
         "view_wallapop": "Voir sur Wallapop",
-        "view_vinted": "Voir sur Vinted"
+        "view_vinted": "Voir sur Vinted",
+        "chat_paired": "✅ Chat lié avec succès. Vous pouvez fermer la fenêtre sur le web."
     },
     "it": {
         "bot_started": "🚀 <b>Findly Bot avviato con successo.</b>\nMonitoraggio web e notifiche attivi.",
@@ -101,7 +104,8 @@ translations = {
         "view_wallapop_all": "Vedi tutti i risultati su Wallapop",
         "view_vinted_all": "Vedi tutti i risultati su Vinted",
         "view_wallapop": "Vedi su Wallapop",
-        "view_vinted": "Vedi su Vinted"
+        "view_vinted": "Vedi su Vinted",
+        "chat_paired": "✅ Chat collegata con successo. Puoi chiudere la finestra sul web."
     },
     "pt": {
         "bot_started": "🚀 <b>Findly Bot iniciado com sucesso.</b>\nMonitorização web e notificações ativas.",
@@ -127,7 +131,8 @@ translations = {
         "view_wallapop_all": "Ver todos os resultados no Wallapop",
         "view_vinted_all": "Ver todos os resultados na Vinted",
         "view_wallapop": "Ver no Wallapop",
-        "view_vinted": "Ver na Vinted"
+        "view_vinted": "Ver na Vinted",
+        "chat_paired": "✅ Chat associado com sucesso. Podes fechar a janela na web."
     }
 }
 

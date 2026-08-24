@@ -23,6 +23,15 @@ def restricted(func):
             allowed_chats = []
             
         chat_id = update.effective_chat.id
+        
+        if update.message and update.message.text:
+            msg_text = update.message.text.strip()
+            if len(msg_text) == 5 and msg_text.isalnum():
+                from pairing import claim_code
+                if claim_code(msg_text.upper(), chat_id):
+                    await update.message.reply_text(t("chat_paired", get_setting("region", "es")))
+                    return
+
         if chat_id not in allowed_chats:
             await update.message.reply_text(t("unauthorized", get_setting("region", "es")))
             return
