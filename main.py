@@ -3,7 +3,7 @@ import logging
 import asyncio
 import sys
 from telegram.ext import Application, CommandHandler, CallbackQueryHandler, MessageHandler, filters
-from database import init_db, get_setting
+from database import init_db, get_setting, cleanup_old_items
 from handlers import start, add_search, list_searches, delete_search, button_callback, handle_message
 from scheduler import platform_scheduler_loop, telegram_notifier_loop
 
@@ -17,6 +17,15 @@ logger = logging.getLogger(__name__)
 global_loop = None
 global_queue = None
 
+async def cleanup_loop():
+    logger.info("Database cleanup worker started.")
+    while True:
+        try:
+            await asyncio.to_thread(cleanup_old_items, 10)
+        except Exception as e:
+            logger.error(f"Error in cleanup loop: {e}")
+        await asyncio.sleep(12 * 3600)  # Check twice a day
+
 async def post_init(application: Application):
     global global_loop, global_queue
     global_loop = asyncio.get_running_loop()
@@ -25,6 +34,7 @@ async def post_init(application: Application):
     asyncio.create_task(telegram_notifier_loop(application, global_queue))
     asyncio.create_task(platform_scheduler_loop(global_queue, "wallapop"))
     asyncio.create_task(platform_scheduler_loop(global_queue, "vinted"))
+    asyncio.create_task(cleanup_loop())
     
     # Send startup message
     allowed_chats = get_setting("allowed_chat_ids", "")

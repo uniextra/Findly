@@ -101,3 +101,20 @@ def get_db():
         yield db
     finally:
         db.close()
+
+def cleanup_old_items(days_old=10):
+    from datetime import timedelta
+    import logging
+    logger = logging.getLogger(__name__)
+    
+    db = SessionLocal()
+    try:
+        cutoff = datetime.utcnow() - timedelta(days=days_old)
+        deleted = db.query(SeenItem).filter(SeenItem.found_at < cutoff).delete()
+        db.commit()
+        if deleted > 0:
+            logger.info(f"Cleaned up {deleted} items older than {days_old} days.")
+    except Exception as e:
+        logger.error(f"Error cleaning up old items: {e}")
+    finally:
+        db.close()
