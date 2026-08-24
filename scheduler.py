@@ -5,6 +5,7 @@ from datetime import datetime
 from telegram.ext import Application
 from telegram import InlineKeyboardMarkup, InlineKeyboardButton
 from database import SessionLocal, Search, SeenItem, get_setting
+from i18n import t
 from wallapop import search_items
 from vinted import search_vinted
 import urllib.parse
@@ -136,16 +137,15 @@ async def check_single_search(search_id: int, queue: asyncio.Queue, platform_ove
             web_url = f"{base_web_url}?{urllib.parse.urlencode(params)}"
             vinted_url = f"https://www.vinted.{vinted_domain}/catalog?search_text={search.keywords}"
             
-            summary_msg = (
-                f"⚠️ <b>Se han encontrado {new_items_count} artículos nuevos.</b>\n"
-                f"Solo se han mostrado los primeros {max_items_to_notify}.\n"
-            )
+            summary_msg = t("new_items_found", region, count=new_items_count)
+            summary_msg += t("showing_first", region, count=max_items_to_notify)
+            
             if target_platform == "wallapop":
-                 summary_msg += f"<a href='{web_url}'>Ver todos los resultados en Wallapop</a>"
+                 summary_msg += f"<a href='{web_url}'>{t('view_wallapop_all', region)}</a>"
             elif target_platform == "vinted":
-                 summary_msg += f"<a href='{vinted_url}'>Ver todos los resultados en Vinted</a>"
+                 summary_msg += f"<a href='{vinted_url}'>{t('view_vinted_all', region)}</a>"
             else:
-                 summary_msg += f"<a href='{web_url}'>Ver en Wallapop</a> | <a href='{vinted_url}'>Ver en Vinted</a>"
+                 summary_msg += f"<a href='{web_url}'>{t('view_wallapop', region)}</a> | <a href='{vinted_url}'>{t('view_vinted', region)}</a>"
 
                  
             keyboard = [[InlineKeyboardButton("❌ Dejar de seguir", callback_data=f"delete_{search.id}")]]

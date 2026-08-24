@@ -77,11 +77,11 @@
             <!-- DASHBOARD -->
             <div v-if="currentRoute === 'dashboard'" class="grid grid-cols-1 md:grid-cols-3 gap-6">
                 <div class="bg-white p-6 rounded-xl border border-gray-200 shadow-sm">
-                    <div class="text-sm font-medium text-gray-500 mb-1">Bot Status</div>
+                    <div class="text-sm font-medium text-gray-500 mb-1">{{ t('bot_status') }}</div>
                     <div class="text-2xl font-semibold" :class="stats.bot_status === 'Active' ? 'text-green-600' : 'text-red-600'">{{ stats.bot_status }}</div>
                 </div>
                 <div class="bg-white p-6 rounded-xl border border-gray-200 shadow-sm">
-                    <div class="text-sm font-medium text-gray-500 mb-1">Active Searches</div>
+                    <div class="text-sm font-medium text-gray-500 mb-1">{{ t('active_searches') }}</div>
                     <div class="text-2xl font-semibold text-gray-900">{{ stats.active_searches }}</div>
                 </div>
                 <div class="bg-white p-6 rounded-xl border border-gray-200 shadow-sm">
@@ -94,7 +94,7 @@
             <div v-if="currentRoute === 'searches'" class="space-y-6">
                 <!-- Quick Add via URL -->
                 <div class="bg-white p-6 rounded-xl border border-gray-200 shadow-sm">
-                    <h3 class="text-lg font-semibold mb-4">Quick Add via URL</h3>
+                    <h3 class="text-lg font-semibold mb-4">{{ t('quick_add_via_url') }}</h3>
                     <div class="flex flex-col md:flex-row gap-4">
                         <input v-model="quickUrl" @input="parseUrl" class="flex-1 rounded-md border-gray-300 shadow-sm py-2 px-3 focus:border-primary focus:ring-primary" placeholder="Paste Wallapop or Vinted search URL here..." type="url">
                     </div>
@@ -102,19 +102,19 @@
 
                 <!-- Add Form -->
                 <div :class="{'animate-shake': shakeForm}" class="bg-white p-6 rounded-xl border border-gray-200 shadow-sm">
-                    <h3 class="text-lg font-semibold mb-4">{{ isEditing ? 'Edit Search' : 'Add New Tracking Query' }}</h3>
+                    <h3 class="text-lg font-semibold mb-4">{{ isEditing ? t('edit_search') : t('add_new_tracking_query') }}</h3>
                     <form class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
                         
                         <div class="lg:col-span-2">
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Keywords</label>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">{{ t('keywords') }}</label>
                             <input v-model="formSearch.keywords" class="w-full rounded-md border-gray-300 shadow-sm py-2 px-3 focus:border-primary focus:ring-primary" placeholder="MacBook Pro M2..." type="text">
                         </div>
                         
                         
                           <div class="lg:col-span-2">
                               <div class="flex justify-between mb-3">
-                                  <label class="block text-sm font-medium text-gray-700">Price Range</label>
-                                  <span class="text-sm text-gray-500 font-medium">€{{ actualMinPrice }} - {{ actualMaxPrice >= 1500 ? 'Any' : '€' + actualMaxPrice }}</span>
+                                  <label class="block text-sm font-medium text-gray-700">{{ t('price_range') }}</label>
+                                  <span class="text-sm text-gray-500 font-medium">€{{ actualMinPrice }} - {{ actualMaxPrice >= 1500 ? t('any') : '€' + actualMaxPrice }}</span>
                               </div>
                               <div class="relative w-full h-8 flex items-center">
                                   <div class="absolute w-full h-2 bg-gray-200 rounded-lg"></div>
@@ -136,26 +136,26 @@
                                 <span>5km</span>
                                 <span>10km</span>
                                 <span>30km</span>
-                                <span>Any</span>
+                                <span>{{ t('any') }}</span>
                             </div>
                         </div>
                         <div class="lg:col-span-2 flex flex-col justify-center">
-                            <label class="block text-sm font-medium text-gray-700 mb-3">Platforms</label>
+                            <label class="block text-sm font-medium text-gray-700 mb-3">{{ t('platforms') }}</label>
                             <div class="flex gap-6">
                                 <label class="inline-flex items-center cursor-pointer">
                                   <input type="checkbox" v-model="formSearch.wallapop" class="sr-only peer">
                                   <div class="relative w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-green-500"></div>
-                                  <span class="ms-3 text-sm font-medium text-gray-700">Wallapop</span>
+                                  <span class="ms-3 text-sm font-medium text-gray-700">{{ t('wallapop') }}</span>
                                 </label>
                                 <label class="inline-flex items-center cursor-pointer">
                                   <input type="checkbox" v-model="formSearch.vinted" class="sr-only peer">
                                   <div class="relative w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-500"></div>
-                                  <span class="ms-3 text-sm font-medium text-gray-700">Vinted</span>
+                                  <span class="ms-3 text-sm font-medium text-gray-700">{{ t('vinted') }}</span>
                                 </label>
                             </div>
                         </div>
                         <div class="lg:col-span-3 flex justify-end items-end gap-2">
-                            <button v-if="isEditing" @click="cancelEdit" type="button" class="px-6 py-2 rounded-lg text-gray-700 border border-gray-300 hover:bg-gray-50 transition-colors">Cancel</button>
+                            <button v-if="isEditing" @click="cancelEdit" type="button" class="px-6 py-2 rounded-lg text-gray-700 border border-gray-300 hover:bg-gray-50 transition-colors">{{ t('cancel') }}</button>
                             <button @click="saveSearch" type="button" class="bg-primary text-white px-6 py-2 rounded-lg font-medium hover:bg-[#005a62] transition-colors shadow-sm flex items-center gap-2">
                                 <span class="material-symbols-outlined text-[18px]">{{ isEditing ? 'save' : 'add' }}</span> {{ isEditing ? 'Save Changes' : 'Add Search' }}
                             </button>
@@ -169,14 +169,14 @@
                         <table class="w-full text-left border-collapse">
                             <thead>
                                 <tr class="bg-gray-50 border-b border-gray-200 text-sm font-semibold text-gray-600">
-                                    <th class="py-3 px-4">ID</th>
-                                    <th class="py-3 px-4">Keywords</th>
-                                    <th class="py-3 px-4">Price Range</th>
-                                    <th class="py-3 px-4">Distance</th>
+                                    <th class="py-3 px-4">{{ t('id') }}</th>
+                                    <th class="py-3 px-4">{{ t('keywords') }}</th>
+                                    <th class="py-3 px-4">{{ t('price_range') }}</th>
+                                    <th class="py-3 px-4">{{ t('distance') }}</th>
                                     <th class="py-3 px-4">Platform</th>
-                                    <th class="py-3 px-4">Added On</th>
-                                    <th class="py-3 px-4">Last Checked</th>
-                                    <th class="py-3 px-4 text-right">Actions</th>
+                                    <th class="py-3 px-4">{{ t('added_on') }}</th>
+                                    <th class="py-3 px-4">{{ t('last_checked') }}</th>
+                                    <th class="py-3 px-4 text-right">{{ t('actions') }}</th>
                                 </tr>
                             </thead>
                             <tbody class="divide-y divide-gray-200">
@@ -185,13 +185,13 @@
                                     <td class="py-3 px-4 font-medium text-gray-900">{{ search.keywords }}</td>
                                     <td class="py-3 px-4 text-gray-600">
                                         <span v-if="search.min_price || search.max_price">€{{ search.min_price || 0 }} - €{{ search.max_price || 'Any' }}</span>
-                                        <span v-else>Any</span>
+                                        <span v-else>{{ t('any') }}</span>
                                     </td>
-                                    <td class="py-3 px-4 text-gray-600">{{ search.distance_in_km ? search.distance_in_km + ' km' : 'Any' }}</td>
+                                    <td class="py-3 px-4 text-gray-600">{{ search.distance_in_km ? search.distance_in_km + ' km' : t('any') }}</td>
                                     <td class="py-3 px-4">
                                         <div class="flex gap-1">
-                                            <a :href="getWallapopUrl(search)" target="_blank" v-if="search.platform === 'wallapop' || search.platform === 'both'" class="px-2 py-1 bg-green-100 text-green-700 text-xs font-semibold rounded border border-green-200 hover:bg-green-200 transition-colors">Wallapop</a>
-                                            <a :href="getVintedUrl(search)" target="_blank" v-if="search.platform === 'vinted' || search.platform === 'both'" class="px-2 py-1 bg-blue-100 text-blue-700 text-xs font-semibold rounded border border-blue-200 hover:bg-blue-200 transition-colors">Vinted</a>
+                                            <a :href="getWallapopUrl(search)" target="_blank" v-if="search.platform === 'wallapop' || search.platform === 'both'" class="px-2 py-1 bg-green-100 text-green-700 text-xs font-semibold rounded border border-green-200 hover:bg-green-200 transition-colors">{{ t('wallapop') }}</a>
+                                            <a :href="getVintedUrl(search)" target="_blank" v-if="search.platform === 'vinted' || search.platform === 'both'" class="px-2 py-1 bg-blue-100 text-blue-700 text-xs font-semibold rounded border border-blue-200 hover:bg-blue-200 transition-colors">{{ t('vinted') }}</a>
                                         </div>
                                     </td>
                                     <td class="py-3 px-4 text-gray-500 text-sm whitespace-nowrap">{{ formatDate(search.created_at) }}</td>
@@ -222,11 +222,11 @@
                         <table class="w-full text-left border-collapse">
                             <thead>
                                 <tr class="bg-gray-50 border-b border-gray-200 text-sm font-semibold text-gray-600">
-                                    <th class="py-3 px-4">ID</th>
+                                    <th class="py-3 px-4">{{ t('id') }}</th>
                                     <th class="py-3 px-4">Search Keywords</th>
                                     <th class="py-3 px-4">Item Title</th>
-                                    <th class="py-3 px-4">Price</th>
-                                    <th class="py-3 px-4">Found At</th>
+                                    <th class="py-3 px-4">{{ t('price') }}</th>
+                                    <th class="py-3 px-4">{{ t('found_at') }}</th>
                                     <th class="py-3 px-4">Link</th>
                                 </tr>
                             </thead>
@@ -258,7 +258,7 @@
                     <h3 class="text-lg font-semibold mb-6 flex items-center gap-2 text-gray-800"><span class="material-symbols-outlined text-primary">forum</span> Telegram Configuration</h3>
                     <div class="space-y-6">
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Telegram Bot Token</label>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">{{ t('telegram_token') }}</label>
                             <input v-model="settings.telegram_token" type="password" class="w-full rounded-md border-gray-300 shadow-sm py-2 px-3 focus:border-primary focus:ring-primary" placeholder="123456:ABC-DEF1234ghIkl-zyx57W2v1u123ew11">
                             <p class="text-xs text-gray-500 mt-1">Token generated by BotFather in Telegram.</p>
                         </div>
@@ -275,7 +275,7 @@
                     <h3 class="text-lg font-semibold mb-6 flex items-center gap-2 text-gray-800"><span class="material-symbols-outlined text-primary">schedule</span> Scraping & Region</h3>
                     
                     <div class="mb-6">
-                        <label class="block text-sm font-medium text-gray-700 mb-2">Base Region</label>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">{{ t('base_region') }}</label>
                         <div class="flex flex-wrap gap-2">
                             <button type="button" @click="settings.region = 'es'" :class="settings.region === 'es' ? 'bg-primary text-white border-primary' : 'bg-white text-gray-600 border-gray-200 hover:bg-gray-50'" class="px-4 py-1.5 rounded-full border text-sm font-semibold transition-colors">ES</button>
                             <button type="button" @click="settings.region = 'fr'" :class="settings.region === 'fr' ? 'bg-primary text-white border-primary' : 'bg-white text-gray-600 border-gray-200 hover:bg-gray-50'" class="px-4 py-1.5 rounded-full border text-sm font-semibold transition-colors">FR</button>
@@ -283,7 +283,7 @@
                             <button type="button" @click="settings.region = 'pt'" :class="settings.region === 'pt' ? 'bg-primary text-white border-primary' : 'bg-white text-gray-600 border-gray-200 hover:bg-gray-50'" class="px-4 py-1.5 rounded-full border text-sm font-semibold transition-colors">PT</button>
                             <button type="button" @click="settings.region = 'uk'" :class="settings.region === 'uk' ? 'bg-primary text-white border-primary' : 'bg-white text-gray-600 border-gray-200 hover:bg-gray-50'" class="px-4 py-1.5 rounded-full border text-sm font-semibold transition-colors">UK</button>
                         </div>
-                        <p class="text-xs text-gray-500 mt-2">Select the country to adapt platform search domains.</p>
+                        <p class="text-xs text-gray-500 mt-2">{{ t('select_country') }}</p>
                     </div>
 
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -315,6 +315,97 @@ const { createApp, ref, onMounted } = Vue
 
 createApp({
     setup() {
+        
+        const i18n = {
+            es: {
+                dashboard: "Panel", searches: "Búsquedas", settings: "Ajustes",
+                active_searches: "Búsquedas Activas", total_items_found: "Artículos Encontrados", bot_status: "Estado del Bot",
+                add_new_tracking_query: "Añadir Nueva Búsqueda", edit_search: "Editar Búsqueda",
+                quick_add_via_url: "Añadir rápido por URL", paste_url: "Pega una URL de Wallapop o Vinted aquí para autocompletar.",
+                keywords: "Palabras Clave", eg_iphone: "ej. iphone 13 pro", price_range: "Rango de Precio",
+                distance: "Distancia", any: "Cualquiera", platforms: "Plataformas", wallapop: "Wallapop", vinted: "Vinted",
+                cancel: "Cancelar", save_search: "Guardar Búsqueda", add_search: "Añadir Búsqueda",
+                id: "ID", added_on: "Añadido El", last_checked: "Última Comprobación", actions: "Acciones",
+                title: "Título", price: "Precio", found_at: "Encontrado El",
+                scraping_region: "Scraping y Región", base_region: "Región Base",
+                select_country: "Selecciona el país para adaptar las búsquedas.",
+                wallapop_interval: "Intervalo Wallapop (min)", vinted_interval: "Intervalo Vinted (min)",
+                telegram_config: "Configuración Telegram", telegram_token: "Token del Bot", allowed_chat_ids: "IDs de Chat Permitidos",
+                comma_separated_ids: "IDs separados por coma", save_settings: "Guardar Ajustes"
+            },
+            fr: {
+                dashboard: "Tableau de bord", searches: "Recherches", settings: "Paramètres",
+                active_searches: "Recherches Actives", total_items_found: "Articles Trouvés", bot_status: "Statut du Bot",
+                add_new_tracking_query: "Ajouter Nouvelle Recherche", edit_search: "Modifier Recherche",
+                quick_add_via_url: "Ajout rapide via URL", paste_url: "Collez une URL Wallapop ou Vinted ici.",
+                keywords: "Mots-clés", eg_iphone: "ex. iphone 13 pro", price_range: "Gamme de Prix",
+                distance: "Distance", any: "Tous", platforms: "Plateformes", wallapop: "Wallapop", vinted: "Vinted",
+                cancel: "Annuler", save_search: "Enregistrer Recherche", add_search: "Ajouter Recherche",
+                id: "ID", added_on: "Ajouté Le", last_checked: "Dernière Vérification", actions: "Actions",
+                title: "Titre", price: "Prix", found_at: "Trouvé Le",
+                scraping_region: "Scraping et Région", base_region: "Région de Base",
+                select_country: "Sélectionnez le pays pour adapter les recherches.",
+                wallapop_interval: "Intervalle Wallapop (min)", vinted_interval: "Intervalle Vinted (min)",
+                telegram_config: "Configuration Telegram", telegram_token: "Token du Bot", allowed_chat_ids: "IDs de Chat Autorisés",
+                comma_separated_ids: "IDs séparés par des virgules", save_settings: "Enregistrer Paramètres"
+            },
+            it: {
+                dashboard: "Pannello", searches: "Ricerche", settings: "Impostazioni",
+                active_searches: "Ricerche Attive", total_items_found: "Articoli Trovati", bot_status: "Stato del Bot",
+                add_new_tracking_query: "Aggiungi Nuova Ricerca", edit_search: "Modifica Ricerca",
+                quick_add_via_url: "Aggiunta rapida tramite URL", paste_url: "Incolla un URL Wallapop o Vinted qui.",
+                keywords: "Parole Chiave", eg_iphone: "es. iphone 13 pro", price_range: "Fascia di Prezzo",
+                distance: "Distanza", any: "Qualsiasi", platforms: "Piattaforme", wallapop: "Wallapop", vinted: "Vinted",
+                cancel: "Annulla", save_search: "Salva Ricerca", add_search: "Aggiungi Ricerca",
+                id: "ID", added_on: "Aggiunto Il", last_checked: "Ultimo Controllo", actions: "Azioni",
+                title: "Titolo", price: "Prezzo", found_at: "Trovato Il",
+                scraping_region: "Scraping e Regione", base_region: "Regione di Base",
+                select_country: "Seleziona il paese per adattare le ricerche.",
+                wallapop_interval: "Intervallo Wallapop (min)", vinted_interval: "Intervallo Vinted (min)",
+                telegram_config: "Configurazione Telegram", telegram_token: "Token del Bot", allowed_chat_ids: "ID Chat Consentiti",
+                comma_separated_ids: "ID separati da virgola", save_settings: "Salva Impostazioni"
+            },
+            pt: {
+                dashboard: "Painel", searches: "Pesquisas", settings: "Configurações",
+                active_searches: "Pesquisas Ativas", total_items_found: "Artigos Encontrados", bot_status: "Estado do Bot",
+                add_new_tracking_query: "Adicionar Nova Pesquisa", edit_search: "Editar Pesquisa",
+                quick_add_via_url: "Adição rápida via URL", paste_url: "Cola um URL Wallapop ou Vinted aqui.",
+                keywords: "Palavras-chave", eg_iphone: "ex. iphone 13 pro", price_range: "Faixa de Preço",
+                distance: "Distância", any: "Qualquer", platforms: "Plataformas", wallapop: "Wallapop", vinted: "Vinted",
+                cancel: "Cancelar", save_search: "Guardar Pesquisa", add_search: "Adicionar Pesquisa",
+                id: "ID", added_on: "Adicionado Em", last_checked: "Última Verificação", actions: "Ações",
+                title: "Título", price: "Preço", found_at: "Encontrado Em",
+                scraping_region: "Scraping e Região", base_region: "Região Base",
+                select_country: "Seleciona o país para adaptar as pesquisas.",
+                wallapop_interval: "Intervalo Wallapop (min)", vinted_interval: "Intervalo Vinted (min)",
+                telegram_config: "Configuração Telegram", telegram_token: "Token do Bot", allowed_chat_ids: "IDs de Chat Permitidos",
+                comma_separated_ids: "IDs separados por vírgula", save_settings: "Guardar Configurações"
+            },
+            en: {
+                dashboard: "Dashboard", searches: "Searches", settings: "Settings",
+                active_searches: "Active Searches", total_items_found: "Total Items Found", bot_status: "Bot Status",
+                add_new_tracking_query: "Add New Tracking Query", edit_search: "Edit Search",
+                quick_add_via_url: "Quick Add via URL", paste_url: "Paste a Wallapop or Vinted search URL here to auto-fill the form.",
+                keywords: "Keywords", eg_iphone: "e.g., iphone 13 pro", price_range: "Price Range",
+                distance: "Distance", any: "Any", platforms: "Platforms", wallapop: "Wallapop", vinted: "Vinted",
+                cancel: "Cancel", save_search: "Save Search", add_search: "Add Search",
+                id: "ID", added_on: "Added On", last_checked: "Last Checked", actions: "Actions",
+                title: "Title", price: "Price", found_at: "Found At",
+                scraping_region: "Scraping & Region", base_region: "Base Region",
+                select_country: "Select the country to adapt platform search domains.",
+                wallapop_interval: "Wallapop Interval (mins)", vinted_interval: "Vinted Interval (mins)",
+                telegram_config: "Telegram Configuration", telegram_token: "Telegram Bot Token", allowed_chat_ids: "Allowed Chat IDs",
+                comma_separated_ids: "Comma separated IDs", save_settings: "Save Settings"
+            }
+        }
+        
+        const t = (key) => {
+            const lang = settings.value.region === 'uk' ? 'en' : (settings.value.region || 'es')
+            if (i18n[lang] && i18n[lang][key]) return i18n[lang][key]
+            if (i18n['es'] && i18n['es'][key]) return i18n['es'][key]
+            return key
+        }
+
         const currentRoute = ref('dashboard')
         const stats = ref({ active_searches: 0, total_items: 0, bot_status: 'Loading...' })
         const searches = ref([])
@@ -369,7 +460,7 @@ createApp({
         const distanceMap = [5, 10, 30, null];
         const distanceLabel = Vue.computed(() => {
             const val = distanceMap[formSearch.value.distance_index];
-            return val ? val + ' km' : 'Any';
+            return val ? val + ' km' : t('any');
         });
 
 
@@ -570,6 +661,7 @@ createApp({
         })
 
         return {
+            t,
             currentRoute,
             stats,
             searches,

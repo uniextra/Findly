@@ -2,6 +2,7 @@ from telegram import Update
 from telegram.ext import ContextTypes
 from sqlalchemy.orm import Session
 from database import SessionLocal, Search, get_setting
+from i18n import t
 
 def get_db_session():
     return SessionLocal()
@@ -23,13 +24,14 @@ def restricted(func):
             
         chat_id = update.effective_chat.id
         if chat_id not in allowed_chats:
-            await update.message.reply_text("⛔ No estás autorizado para usar este bot.")
+            await update.message.reply_text(t("unauthorized", get_setting("region", "es")))
             return
         return await func(update, context, *args, **kwargs)
     return wrapped
 
 @restricted
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    region = get_setting('region', 'es')
     msg = (
         "Hola! Soy Findly. Puedo avisarte de nuevos productos en Wallapop y Vinted 🚀.\n\n"
         "Comandos:\n"
@@ -53,6 +55,7 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await process_add_search(update, text)
 
 async def process_add_search(update: Update, full_text: str):
+    region = get_setting('region', 'es')
     keywords_str = ""
     min_price = None
     max_price = None
@@ -74,7 +77,7 @@ async def process_add_search(update: Update, full_text: str):
             if "vinted" in parsed.netloc:
                 platform = "vinted"
                 if "search_text" not in params:
-                    await update.message.reply_text("La URL de Vinted no contiene palabras clave (search_text).")
+                    await update.message.reply_text(t("vinted_no_keywords", region))
                     return
                 keywords_str = params["search_text"][0]
                 if "price_from" in params:
@@ -86,7 +89,7 @@ async def process_add_search(update: Update, full_text: str):
             else:
                 platform = "wallapop"
                 if "keywords" not in params:
-                    await update.message.reply_text("La URL no contiene palabras clave.")
+                    await update.message.reply_text(t("url_no_keywords", region))
                     return
                     
                 keywords_str = params["keywords"][0]
@@ -104,7 +107,7 @@ async def process_add_search(update: Update, full_text: str):
                     except ValueError: pass
                     
         except Exception as e:
-            await update.message.reply_text(f"Error al procesar la URL: {e}")
+            await update.message.reply_text(t("url_error", region, e=e))
             return
             
     else:
@@ -112,7 +115,7 @@ async def process_add_search(update: Update, full_text: str):
         parts = [p.strip() for p in full_text.split(",")]
 
         if not parts or not parts[0]:
-            await update.message.reply_text("Uso: /add <palabras clave> [, min_precio, max_precio] O pega una URL de Wallapop o Vinted")
+            await update.message.reply_text(t("usage_add", region))
             return
 
         keywords_str = parts[0]
@@ -122,14 +125,14 @@ async def process_add_search(update: Update, full_text: str):
             try:
                 min_price = float(parts[1])
             except ValueError:
-                await update.message.reply_text("El precio mínimo debe ser un número.")
+                await update.message.reply_text(t("min_price_num", region))
                 return
 
         if len(parts) > 2:
             try:
                 max_price = float(parts[2])
             except ValueError:
-                await update.message.reply_text("El precio máximo debe ser un número.")
+                await update.message.reply_text(t("max_price_num", region))
                 return
 
     db: Session = get_db_session()
@@ -144,14 +147,15 @@ async def process_add_search(update: Update, full_text: str):
         )
         db.add(search)
         db.commit()
-        await update.message.reply_text(f"Búsqueda guardada [{platform}]: '{keywords_str}' (Min: {min_price}, Max: {max_price})")
+        await update.message.reply_text(t("search_saved", region, platform=platform, keywords=keywords_str, min_price=min_price, max_price=max_price))
     except Exception as e:
-        await update.message.reply_text(f"Error al guardar: {e}")
+        await update.message.reply_text(t("save_error", region, e=e))
     finally:
         db.close()
 
 @restricted
 async def list_searches(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    region = get_setting('region', 'es')
     db: Session = get_db_session()
     try:
         searches = db.query(Search).filter(Search.chat_id == update.effective_chat.id).all()
@@ -177,6 +181,7 @@ async def list_searches(update: Update, context: ContextTypes.DEFAULT_TYPE):
         db.close()
 
 async def button_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    region = get_setting('region', 'es')
     query = update.callback_query
     await query.answer()
     
@@ -197,9 +202,9 @@ async def button_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
                     if query.message.caption:
                         await query.edit_message_caption(caption=query.message.caption + "\n\n❌ <i>Búsqueda eliminada.</i>", parse_mode="HTML", reply_markup=None)
                     else:
-                        await query.edit_message_text(text=query.message.text + "\n\n❌ <i>Búsqueda eliminada.</i>", parse_mode="HTML", reply_markup=None)
+                        await query.edit_message_text(text=query.message.text + t("search_deleted_inline", region), parse_mode="HTML", reply_markup=None)
                 else:
-                    await query.message.reply_text("La búsqueda ya no existe o ya fue eliminada.")
+                    await query.message.reply_text(t("search_already_deleted", region))
             finally:
                 db.close()
         except ValueError:
@@ -208,14 +213,15 @@ async def button_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 @restricted
 async def delete_search(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    region = get_setting('region', 'es')
     if not context.args:
-        await update.message.reply_text("Uso: /delete <id>")
+        await update.message.reply_text(t("usage_delete", region))
         return
     
     try:
         search_id = int(context.args[0])
     except ValueError:
-        await update.message.reply_text("El ID debe ser un número.")
+        await update.message.reply_text(t("id_must_be_num", region))
         return
 
     db: Session = get_db_session()
@@ -224,9 +230,9 @@ async def delete_search(update: Update, context: ContextTypes.DEFAULT_TYPE):
         if search:
             db.delete(search)
             db.commit()
-            await update.message.reply_text(f"Búsqueda {search_id} eliminada.")
+            await update.message.reply_text(t("search_deleted", region, id=search_id))
         else:
-            await update.message.reply_text("Búsqueda no encontrada.")
+            await update.message.reply_text(t("search_not_found", region))
     finally:
         db.close()
 

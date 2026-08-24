@@ -4,6 +4,7 @@ import asyncio
 import sys
 from telegram.ext import Application, CommandHandler, CallbackQueryHandler, MessageHandler, filters
 from database import init_db, get_setting, cleanup_old_items
+from i18n import t
 from handlers import start, add_search, list_searches, delete_search, button_callback, handle_message
 from scheduler import platform_scheduler_loop, telegram_notifier_loop
 
@@ -42,9 +43,10 @@ async def post_init(application: Application):
         chat_ids = [int(cid.strip("'\" ")) for cid in allowed_chats.split(',') if cid.strip()]
         for chat_id in chat_ids:
             try:
+                region = get_setting("region", "es")
                 await application.bot.send_message(
                     chat_id=chat_id, 
-                    text="🚀 <b>Findly Bot iniciado correctamente.</b>\nMonitoreo web y notificaciones activos.",
+                    text=t("bot_started", region),
                     parse_mode="HTML"
                 )
             except Exception as e:

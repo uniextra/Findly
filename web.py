@@ -1,11 +1,13 @@
 import os
 from fastapi import FastAPI, HTTPException, Request
 from fastapi.responses import HTMLResponse
+from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 from typing import Optional, List, Dict
 from database import SessionLocal, Search, SeenItem, AppSetting, get_setting
 
 app = FastAPI(title="Findly Web UI")
+app.mount("/static", StaticFiles(directory="static"), name="static")
 
 class SearchCreate(BaseModel):
     keywords: str
