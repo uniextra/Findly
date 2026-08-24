@@ -76,6 +76,13 @@ def init_db():
         except Exception as e:
             print(f"Migration error: {e}")
 
+        # Migration to add condition column
+        try:
+            conn.execute(text("ALTER TABLE searches ADD COLUMN condition VARCHAR"))
+            print("Added condition column to searches table")
+        except Exception as e:
+            print(f"Migration error (condition): {e}")
+
         # Migrations for seen_items
         try:
             conn.execute(text("ALTER TABLE seen_items ADD COLUMN title VARCHAR"))
