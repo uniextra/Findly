@@ -9,6 +9,8 @@ Findly (formerly Wallatrack) is a high-efficiency Telegram bot and Web Dashboard
 - **Modern Web UI**: Manage everything from a sleek Single Page Application (Dashboard, Searches, and Settings).
 - **Internationalization (i18n)**: The Web Dashboard automatically adapts to English, Spanish, French, Italian, and Portuguese based on your browser's language.
 - **Quick Add via URL**: Paste a Wallapop or Vinted URL directly in the Web UI or Telegram to auto-fill the search criteria.
+- **Location Geocoding**: Set your exact city or postal code with smart autocomplete. The bot will precisely calculate coordinates globally for localized searches.
+- **Item Condition Filter**: Filter results precisely by item condition (New, Mint, Good, Fair, Poor). Findly automatically maps these universal conditions to both Wallapop and Vinted's native category IDs behind the scenes.
 - **Easy Telegram Group Pairing**: Connect your Telegram groups to the bot securely with a 5-digit pairing code directly from the Web UI (`/link CODE`), eliminating the need to manually lookup Chat IDs.
 - **Unified Broadcasting**: New item alerts are automatically broadcasted to all authorized chats, ensuring your entire team stays updated regardless of who added the tracking query.
 - **Anti-ban Resilience (No Proxies needed by default)**:

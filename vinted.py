@@ -13,7 +13,7 @@ USER_AGENTS = [
     "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36"
 ]
 
-def search_vinted(keywords: str, min_price: Optional[float] = None, max_price: Optional[float] = None) -> List[Dict]:
+def search_vinted(keywords: str, min_price: Optional[float] = None, max_price: Optional[float] = None, condition: Optional[str] = None) -> List[Dict]:
     """
     Search for items on Vinted.
     """
@@ -31,6 +31,19 @@ def search_vinted(keywords: str, min_price: Optional[float] = None, max_price: O
         params["price_from"] = min_price
     if max_price is not None:
         params["price_to"] = max_price
+
+    if condition:
+        # Map generic condition to Vinted status_ids array
+        v_map = {
+            "new": "6,1", # Nuevo con y sin etiquetas
+            "mint": "2", # Muy bueno
+            "good": "3", # Bueno
+            "fair": "4", # Satisfactorio
+            "poor": "" # No equivalent in Vinted really, but we can omit or pass nothing
+        }
+        mapped = v_map.get(condition)
+        if mapped:
+            params["status_ids"] = mapped
 
     session = requests.Session()
     retries = 0

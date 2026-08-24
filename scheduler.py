@@ -23,7 +23,7 @@ async def telegram_notifier_loop(application: Application, queue: asyncio.Queue)
             allowed_str = get_setting("allowed_chat_ids", "")
             try:
                 chat_ids = [int(cid.strip("'\" ")) for cid in allowed_str.split(',') if cid.strip()]
-            except:
+            except ValueError:
                 chat_ids = []
                 
             for chat_id in chat_ids:
@@ -71,10 +71,10 @@ async def check_single_search(search_id: int, queue: asyncio.Queue, platform_ove
         target_platform = platform_override or search.platform or "both"
         
         if target_platform in ["wallapop", "both"]:
-            items.extend(search_items(search.keywords, search.min_price, search.max_price, search.distance_in_km))
+            items.extend(search_items(search.keywords, search.min_price, search.max_price, search.distance_in_km, search.condition))
         
         if target_platform in ["vinted", "both"]:
-            items.extend(search_vinted(search.keywords, search.min_price, search.max_price))
+            items.extend(search_vinted(search.keywords, search.min_price, search.max_price, search.condition))
         
         new_items_count = 0
         max_items_to_notify = 10
@@ -140,9 +140,18 @@ async def check_single_search(search_id: int, queue: asyncio.Queue, platform_ove
             }
             if search.min_price: params["min_sale_price"] = search.min_price
             if search.max_price: params["max_sale_price"] = search.max_price
+            
+            if search.condition:
+                w_map = {"new": "new", "mint": "as_good_as_new", "good": "good", "fair": "fair", "poor": "has_given_it_all"}
+                if search.condition in w_map: params["condition"] = w_map[search.condition]
                 
             web_url = f"{base_web_url}?{urllib.parse.urlencode(params)}"
-            vinted_url = f"https://www.vinted.{vinted_domain}/catalog?search_text={search.keywords}"
+            
+            v_params = {"search_text": search.keywords}
+            if search.condition:
+                v_map = {"new": "6,1", "mint": "2", "good": "3", "fair": "4"}
+                if search.condition in v_map: v_params["status_ids"] = v_map[search.condition]
+            vinted_url = f"https://www.vinted.{vinted_domain}/catalog?{urllib.parse.urlencode(v_params)}"
             
             summary_msg = t("new_items_found", region, count=new_items_count)
             summary_msg += t("showing_first", region, count=max_items_to_notify)

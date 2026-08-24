@@ -23,6 +23,7 @@ class Search(Base):
     min_price = Column(Float, nullable=True)
     max_price = Column(Float, nullable=True)
     distance_in_km = Column(Integer, nullable=True)
+    condition = Column(String, nullable=True)
     platform = Column(String, default="both")
     created_at = Column(DateTime, default=datetime.utcnow)
     last_checked_at = Column(DateTime, nullable=True)
@@ -58,22 +59,22 @@ def init_db():
         try:
             conn.execute(text("ALTER TABLE searches ADD COLUMN distance_in_km INTEGER"))
             print("Added distance_in_km column to searches table")
-        except Exception:
-            pass
+        except Exception as e:
+            print(f"Migration error: {e}")
 
         # Migration to add platform column
         try:
             conn.execute(text("ALTER TABLE searches ADD COLUMN platform VARCHAR DEFAULT 'both'"))
             print("Added platform column to searches table")
-        except Exception:
-            pass
+        except Exception as e:
+            print(f"Migration error: {e}")
             
         # Migration to add last_checked_at column
         try:
             conn.execute(text("ALTER TABLE searches ADD COLUMN last_checked_at DATETIME"))
             print("Added last_checked_at column to searches table")
-        except Exception:
-            pass
+        except Exception as e:
+            print(f"Migration error: {e}")
 
         # Migrations for seen_items
         try:
@@ -81,8 +82,8 @@ def init_db():
             conn.execute(text("ALTER TABLE seen_items ADD COLUMN price FLOAT"))
             conn.execute(text("ALTER TABLE seen_items ADD COLUMN url VARCHAR"))
             print("Added title, price, url columns to seen_items table")
-        except Exception:
-            pass
+        except Exception as e:
+            print(f"Migration error: {e}")
 
 def get_setting(key: str, default: str = "") -> str:
     db = SessionLocal()

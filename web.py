@@ -15,6 +15,7 @@ class SearchCreate(BaseModel):
     min_price: Optional[float] = None
     max_price: Optional[float] = None
     distance_in_km: Optional[int] = None
+    condition: Optional[str] = None
     platform: str = "both"
     chat_id: Optional[int] = None
 
@@ -53,17 +54,70 @@ def get_stats():
     finally:
         db.close()
 
+
+@app.get("/api/location/search")
+async def search_location(q: str):
+    import httpx
+    from fastapi import HTTPException
+    if not q or len(q) < 3:
+        return []
+    try:
+        url = "https://nominatim.openstreetmap.org/search"
+        params = {
+            "q": q,
+            "format": "json",
+            "limit": 5,
+            "addressdetails": 1
+        }
+        headers = {"User-Agent": "FindlyBot/1.0"}
+        async with httpx.AsyncClient() as client:
+            resp = await client.get(url, params=params, headers=headers, timeout=5.0)
+            if resp.status_code == 200:
+                return resp.json()
+            else:
+                raise HTTPException(status_code=resp.status_code, detail="Geocoding service returned an error")
+    except httpx.TimeoutException:
+        raise HTTPException(status_code=503, detail="Geocoding service timed out")
+    except (httpx.RequestError, ValueError) as e:
+        print(f"Error in geocoding proxy: {e}")
+        raise HTTPException(status_code=503, detail="Geocoding service unavailable")
+
 @app.get("/api/settings")
 def get_settings():
     return {
         "telegram_token": get_setting("telegram_token", ""),
         "allowed_chat_ids": get_setting("allowed_chat_ids", ""),
         "region": get_setting("region", "es"),
+        "location": get_setting("location", ""),
         "wallapop_interval": get_setting("wallapop_interval", "5"),
         "vinted_interval": get_setting("vinted_interval", "5")
     }
 
 from fastapi import BackgroundTasks
+
+
+import requests
+
+async def geocode_location(location_name: str, country_code: str = "es"):
+    import httpx
+    try:
+        url = "https://nominatim.openstreetmap.org/search"
+        params = {
+            "q": location_name,
+            "countrycodes": country_code,
+            "format": "json",
+            "limit": 1
+        }
+        headers = {"User-Agent": "FindlyBot/1.0"}
+        async with httpx.AsyncClient() as client:
+            resp = await client.get(url, params=params, headers=headers, timeout=5.0)
+            if resp.status_code == 200:
+                data = resp.json()
+                if data:
+                    return float(data[0]["lat"]), float(data[0]["lon"])
+    except (httpx.RequestError, ValueError, KeyError, IndexError) as e:
+        print(f"Geocode location failed: {e}")
+    return None, None
 
 @app.post("/api/settings")
 def save_settings(settings: List[SettingUpdate], background_tasks: BackgroundTasks):
@@ -75,6 +129,19 @@ def save_settings(settings: List[SettingUpdate], background_tasks: BackgroundTas
                 existing.value = s.value
             else:
                 db.add(AppSetting(key=s.key, value=s.value))
+                
+            if s.key == "location" and s.value.strip():
+                # Geocode and save lat/lon
+                region_setting = next((x.value for x in settings if x.key == "region"), "es")
+                lat, lon = geocode_location(s.value, region_setting)
+                if lat and lon:
+                    db_lat = db.query(AppSetting).filter(AppSetting.key == "latitude").first()
+                    if db_lat: db_lat.value = str(lat)
+                    else: db.add(AppSetting(key="latitude", value=str(lat)))
+                    
+                    db_lon = db.query(AppSetting).filter(AppSetting.key == "longitude").first()
+                    if db_lon: db_lon.value = str(lon)
+                    else: db.add(AppSetting(key="longitude", value=str(lon)))
         db.commit()
         # Trigger bot restart after response is sent
         from main import restart_bot

@@ -138,8 +138,23 @@
                                 <span>30km</span>
                                 <span>{{ t('any') }}</span>
                             </div>
+
                         </div>
-                        <div class="lg:col-span-2 flex flex-col justify-center">
+                        
+
+                          <!-- Condition -->
+                          <div class="lg:col-span-5 mb-2 mt-2">
+                              <label class="block text-sm font-medium text-gray-700 mb-2">{{ t('condition') }}</label>
+                              <div class="flex flex-wrap gap-2">
+                                  <button type="button" @click="formSearch.condition = ''" :class="formSearch.condition === '' ? 'bg-primary text-white border-primary' : 'bg-white text-gray-600 border-gray-200 hover:bg-gray-50'" class="px-4 py-1.5 rounded-full border text-sm font-semibold transition-colors">{{ t('cond_any') }}</button>
+                                  <button type="button" @click="formSearch.condition = 'new'" :class="formSearch.condition === 'new' ? 'bg-primary text-white border-primary' : 'bg-white text-gray-600 border-gray-200 hover:bg-gray-50'" class="px-4 py-1.5 rounded-full border text-sm font-semibold transition-colors">{{ t('cond_new') }}</button>
+                                  <button type="button" @click="formSearch.condition = 'mint'" :class="formSearch.condition === 'mint' ? 'bg-primary text-white border-primary' : 'bg-white text-gray-600 border-gray-200 hover:bg-gray-50'" class="px-4 py-1.5 rounded-full border text-sm font-semibold transition-colors">{{ t('cond_mint') }}</button>
+                                  <button type="button" @click="formSearch.condition = 'good'" :class="formSearch.condition === 'good' ? 'bg-primary text-white border-primary' : 'bg-white text-gray-600 border-gray-200 hover:bg-gray-50'" class="px-4 py-1.5 rounded-full border text-sm font-semibold transition-colors">{{ t('cond_good') }}</button>
+                                  <button type="button" @click="formSearch.condition = 'fair'" :class="formSearch.condition === 'fair' ? 'bg-primary text-white border-primary' : 'bg-white text-gray-600 border-gray-200 hover:bg-gray-50'" class="px-4 py-1.5 rounded-full border text-sm font-semibold transition-colors">{{ t('cond_fair') }}</button>
+                                  <button type="button" @click="formSearch.condition = 'poor'" :class="formSearch.condition === 'poor' ? 'bg-primary text-white border-primary' : 'bg-white text-gray-600 border-gray-200 hover:bg-gray-50'" class="px-4 py-1.5 rounded-full border text-sm font-semibold transition-colors">{{ t('cond_poor') }}</button>
+                              </div>
+                          </div>
+                          <div class="lg:col-span-2 flex flex-col justify-center">
                             <label class="block text-sm font-medium text-gray-700 mb-3">{{ t('platforms') }}</label>
                             <div class="flex gap-6">
                                 <label class="inline-flex items-center cursor-pointer">
@@ -289,6 +304,25 @@
                         <p class="text-xs text-gray-500 mt-2">{{ t('select_country') }}</p>
                     </div>
 
+                    <!-- Location -->
+                    <div class="mb-6">
+                        <label class="block text-sm font-medium text-slate-700 mb-1">{{ t('location_label') }}</label>
+                        <div class="relative">
+                            <input type="text" v-model="settings.location" @input="handleLocationInput" @focus="settings.location && settings.location.length >= 3 && locationSuggestions.length > 0 ? showSuggestions = true : null" class="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-shadow outline-none" placeholder="Madrid, 28001...">
+                            
+                            <!-- Autocomplete dropdown -->
+                            <div v-if="showSuggestions" class="absolute z-10 w-full mt-1 bg-white border border-gray-200 rounded-md shadow-lg max-h-60 overflow-auto">
+                                <div v-if="isSearchingLocation" class="px-4 py-2 text-sm text-gray-500">Buscando...</div>
+                                <ul v-else>
+                                    <li v-for="loc in locationSuggestions" :key="loc.place_id" @click="selectLocation(loc)" class="px-4 py-2 text-sm hover:bg-emerald-50 cursor-pointer border-b border-gray-100 last:border-0 truncate">
+                                        {{ loc.display_name }}
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                        <p class="text-xs text-slate-500 mt-1">Usado para calcular las distancias en Wallapop (Ej: Madrid, 28001)</p>
+                    </div>
+
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-1">{{ t('wallapop_interval') }}</label>
@@ -378,9 +412,9 @@ createApp({
                 add_new_tracking_query: "Añadir Nueva Búsqueda", edit_search: "Editar Búsqueda",
                 quick_add_via_url: "Añadir rápido por URL", paste_url: "Pega una URL de Wallapop o Vinted aquí.",
                 keywords: "Palabras Clave", eg_iphone: "ej. iphone 13 pro", price_range: "Rango de Precio",
-                distance: "Distancia", any: "Cualquiera", platforms: "Plataformas", wallapop: "Wallapop", vinted: "Vinted",
+                distance: "Distancia", any: "Cualquiera", condition: "Estado", cond_any: "Cualquiera", cond_new: "Nuevo (etiquetas/sin etiquetas)", cond_mint: "Como nuevo / Muy bueno", cond_good: "En buen estado / Bueno", cond_fair: "Bastante usado / Satisfactorio", cond_poor: "Lo ha dado todo", platforms: "Plataformas", wallapop: "Wallapop", vinted: "Vinted",
                 select_country: "Selecciona el país para adaptar las búsquedas.",
-                wallapop_interval: "Intervalo Wallapop (min)", vinted_interval: "Intervalo Vinted (min)",
+                location_label: "Ciudad o Código Postal", location_label: "Cidade ou Código Postal", wallapop_interval: "Intervalo Wallapop (min)", vinted_interval: "Intervalo Vinted (min)",
                 telegram_config: "Configuración Telegram", telegram_token: "Token del Bot", allowed_chat_ids: "IDs de Chat Permitidos",
                 comma_separated_ids: "IDs separados por coma", save_settings: "Guardar Ajustes", add_chat_id: "Añadir Chat ID", auto_obtain_id: "Auto-Obtener ID", manual_enter_id: "Introducir Manualmente", enter_chat_id: "Introduce el Chat ID", confirm: "Confirmar", send_code_to_bot: "Añade el bot al grupo/chat deseado y envía este comando:", expires_in: "Caduca en", code_expired: "El código ha caducado. Inténtalo de nuevo.", chat_added_success: "¡Chat añadido con éxito!", unsaved_changes: "Tienes cambios sin guardar. ¿Seguro que quieres salir?",
                 items_found_all_time: "Artículos Encontrados (Total)", platform: "Plataforma", search_keywords: "Palabras Clave", item_title: "Título", link: "Enlace", view_item: "Ver Artículo", no_items_found: "Aún no se han encontrado artículos.", token_generated_by: "Token generado por BotFather en Telegram.", users_or_groups_allowed: "Usuarios o grupos permitidos para usar el bot y recibir notificaciones.", scraping_region: "Scraping y Región", base_region: "Región Base", added_on: "Añadido el", last_checked: "Última comprobación", actions: "Acciones", add_search: "Añadir Búsqueda", save_changes: "Guardar Cambios"
@@ -391,9 +425,9 @@ createApp({
                 add_new_tracking_query: "Ajouter Nouvelle Recherche", edit_search: "Modifier Recherche",
                 quick_add_via_url: "Ajout rapide via URL", paste_url: "Collez une URL Wallapop ou Vinted ici.",
                 keywords: "Mots-clés", eg_iphone: "ex. iphone 13 pro", price_range: "Gamme de Prix",
-                distance: "Distance", any: "Tous", platforms: "Plateformes", wallapop: "Wallapop", vinted: "Vinted",
+                distance: "Distance", any: "Tous", condition: "État", cond_any: "Tous", cond_new: "Neuf (avec/sans étiquettes)", cond_mint: "Très bon état", cond_good: "Bon état", cond_fair: "Satisfaisant", cond_poor: "Très usé", platforms: "Plateformes", wallapop: "Wallapop", vinted: "Vinted",
                 select_country: "Sélectionnez le pays pour adapter les recherches.",
-                wallapop_interval: "Intervalle Wallapop (min)", vinted_interval: "Intervalle Vinted (min)",
+                location_label: "Ville ou Code Postal", wallapop_interval: "Intervalle Wallapop (min)", vinted_interval: "Intervalle Vinted (min)",
                 telegram_config: "Configuration Telegram", telegram_token: "Token du Bot", allowed_chat_ids: "IDs de Chat Autorisés",
                 comma_separated_ids: "IDs séparés par des virgules", save_settings: "Enregistrer Paramètres", add_chat_id: "Ajouter ID Chat", auto_obtain_id: "Obtenir Automatiquement", manual_enter_id: "Saisir Manuellement", enter_chat_id: "Saisir ID Chat", confirm: "Confirmer", send_code_to_bot: "Ajoutez le bot au groupe/chat souhaité et envoyez cette commande :", expires_in: "Expire dans", code_expired: "Le code a expiré. Veuillez réessayer.", chat_added_success: "Chat ajouté avec succès !", unsaved_changes: "Vous avez des modifications non enregistrées. Voulez-vous vraiment quitter ?",
                 items_found_all_time: "Articles Trouvés (Total)", platform: "Plateforme", search_keywords: "Mots-clés", item_title: "Titre", link: "Lien", view_item: "Voir Article", no_items_found: "Aucun article trouvé pour l'instant.", token_generated_by: "Token généré par BotFather sur Telegram.", users_or_groups_allowed: "Utilisateurs ou groupes autorisés à utiliser le bot et recevoir des notifications.", scraping_region: "Scraping & Région", base_region: "Région de Base", added_on: "Ajouté le", last_checked: "Dernière vérification", actions: "Actions", add_search: "Ajouter Recherche", save_changes: "Enregistrer"
@@ -404,9 +438,9 @@ createApp({
                 add_new_tracking_query: "Aggiungi Nuova Ricerca", edit_search: "Modifica Ricerca",
                 quick_add_via_url: "Aggiunta rapida tramite URL", paste_url: "Incolla un URL Wallapop o Vinted qui.",
                 keywords: "Parole Chiave", eg_iphone: "es. iphone 13 pro", price_range: "Fascia di Prezzo",
-                distance: "Distanza", any: "Qualsiasi", platforms: "Piattaforme", wallapop: "Wallapop", vinted: "Vinted",
+                distance: "Distanza", any: "Qualsiasi", condition: "Condizione", cond_any: "Qualsiasi", cond_new: "Nuovo (con/senza cartellino)", cond_mint: "Ottimo / Molto buono", cond_good: "Buono", cond_fair: "Discreto / Soddisfacente", cond_poor: "Molto usato", platforms: "Piattaforme", wallapop: "Wallapop", vinted: "Vinted",
                 select_country: "Seleziona il paese per adattare le ricerche.",
-                wallapop_interval: "Intervallo Wallapop (min)", vinted_interval: "Intervallo Vinted (min)",
+                location_label: "Città o CAP", wallapop_interval: "Intervallo Wallapop (min)", vinted_interval: "Intervallo Vinted (min)",
                 telegram_config: "Configurazione Telegram", telegram_token: "Token del Bot", allowed_chat_ids: "ID Chat Consentiti",
                 comma_separated_ids: "ID separati da virgola", save_settings: "Salva Impostazioni", add_chat_id: "Aggiungi ID Chat", auto_obtain_id: "Ottieni Automaticamente", manual_enter_id: "Inserisci Manualmente", enter_chat_id: "Inserisci ID Chat", confirm: "Conferma", send_code_to_bot: "Aggiungi il bot al gruppo/chat desiderato e invia questo comando:", expires_in: "Scade in", code_expired: "Codice scaduto. Riprova.", chat_added_success: "Chat aggiunta con successo!", unsaved_changes: "Hai modifiche non salvate. Sei sicuro di voler uscire?",
                 items_found_all_time: "Articoli Trovati (Totale)", platform: "Piattaforma", search_keywords: "Parole Chiave", item_title: "Titolo", link: "Link", view_item: "Vedi Articolo", no_items_found: "Nessun articolo trovato finora.", token_generated_by: "Token generato da BotFather su Telegram.", users_or_groups_allowed: "Utenti o gruppi autorizzati a usare il bot e ricevere notifiche.", scraping_region: "Scraping e Regione", base_region: "Regione di Base", added_on: "Aggiunto il", last_checked: "Ultimo controllo", actions: "Azioni", add_search: "Aggiungi Ricerca", save_changes: "Salva Modifiche"
@@ -419,7 +453,7 @@ createApp({
                 keywords: "Palavras-chave", eg_iphone: "ex. iphone 13 pro", price_range: "Faixa de Preço",
                 distance: "Distância", any: "Qualquer", platforms: "Plataformas", wallapop: "Wallapop", vinted: "Vinted",
                 select_country: "Seleciona o país para adaptar as pesquisas.",
-                wallapop_interval: "Intervalo Wallapop (min)", vinted_interval: "Intervalo Vinted (min)",
+                location_label: "Ciudad o Código Postal", location_label: "Cidade ou Código Postal", wallapop_interval: "Intervalo Wallapop (min)", vinted_interval: "Intervalo Vinted (min)",
                 telegram_config: "Configuração Telegram", telegram_token: "Token do Bot", allowed_chat_ids: "IDs de Chat Permitidos",
                 comma_separated_ids: "IDs separados por vírgula", save_settings: "Guardar Configurações", add_chat_id: "Adicionar ID de Chat", auto_obtain_id: "Obter Automaticamente", manual_enter_id: "Inserir Manualmente", enter_chat_id: "Inserir ID de Chat", confirm: "Confirmar", send_code_to_bot: "Adiciona o bot ao grupo/chat desejado e envia este comando:", expires_in: "Expira em", code_expired: "O código expirou. Tenta novamente.", chat_added_success: "Chat adicionado com sucesso!", unsaved_changes: "Tens alterações não guardadas. Tens a certeza que queres sair?",
                 items_found_all_time: "Artigos Encontrados (Total)", platform: "Plataforma", search_keywords: "Palavras-chave", item_title: "Título", link: "Link", view_item: "Ver Artigo", no_items_found: "Nenhum artigo encontrado ainda.", token_generated_by: "Token gerado pelo BotFather no Telegram.", users_or_groups_allowed: "Utilizadores ou grupos permitidos a usar o bot e receber notificações.", scraping_region: "Scraping & Região", base_region: "Região Base", added_on: "Adicionado em", last_checked: "Última verificação", actions: "Ações", add_search: "Adicionar Pesquisa", save_changes: "Guardar Alterações"
@@ -430,9 +464,9 @@ createApp({
                 add_new_tracking_query: "Add New Tracking Query", edit_search: "Edit Search",
                 quick_add_via_url: "Quick Add via URL", paste_url: "Paste a Wallapop or Vinted search URL here to auto-fill the form.",
                 keywords: "Keywords", eg_iphone: "e.g., iphone 13 pro", price_range: "Price Range",
-                distance: "Distance", any: "Any", platforms: "Platforms", wallapop: "Wallapop", vinted: "Vinted",
+                distance: "Distance", any: "Any", condition: "Condition", cond_any: "Any", cond_new: "New (with/without tags)", cond_mint: "Like new / Very good", cond_good: "Good", cond_fair: "Fair / Satisfactory", cond_poor: "Poor", platforms: "Platforms", wallapop: "Wallapop", vinted: "Vinted",
                 select_country: "Select the country to adapt searches.",
-                wallapop_interval: "Wallapop Interval (mins)", vinted_interval: "Vinted Interval (mins)",
+                location_label: "City or Postal Code", wallapop_interval: "Wallapop Interval (mins)", vinted_interval: "Vinted Interval (mins)",
                 telegram_config: "Telegram Configuration", telegram_token: "Telegram Bot Token", allowed_chat_ids: "Allowed Chat IDs",
                 comma_separated_ids: "Comma separated IDs", save_settings: "Save Settings", add_chat_id: "Add Chat ID", auto_obtain_id: "Auto-Obtain ID", manual_enter_id: "Enter Manually", enter_chat_id: "Enter Chat ID", confirm: "Confirm", send_code_to_bot: "Add the bot to the desired group/chat and send this command:", expires_in: "Expires in", code_expired: "The code expired. Please try again.", chat_added_success: "Chat added successfully!", unsaved_changes: "You have unsaved changes. Are you sure you want to leave?",
                 items_found_all_time: "Items Found (All Time)", platform: "Platform", search_keywords: "Search Keywords", item_title: "Item Title", link: "Link", view_item: "View Item", no_items_found: "No items found yet.", token_generated_by: "Token generated by BotFather in Telegram.", users_or_groups_allowed: "Users or groups allowed to use the bot and receive notifications.", scraping_region: "Scraping & Region", base_region: "Base Region", added_on: "Added On", last_checked: "Last Checked", actions: "Actions", add_search: "Add Search", save_changes: "Save Changes"
@@ -459,6 +493,7 @@ createApp({
                     s.telegram_token !== o.telegram_token ||
                     s.allowed_chat_ids !== o.allowed_chat_ids ||
                     s.region !== o.region ||
+                    s.location !== o.location ||
                     String(s.wallapop_interval) !== String(o.wallapop_interval) ||
                     String(s.vinted_interval) !== String(o.vinted_interval)
                 );
@@ -486,7 +521,7 @@ createApp({
 
         const isEditing = ref(false)
         const editingId = ref(null)
-        const formSearch = ref({ keywords: '', min_price: 0, max_price: 2000, distance_index: 3, wallapop: true, vinted: true })
+        const formSearch = ref({ keywords: '', min_price: 0, max_price: 2000, distance_index: 3, condition: '', wallapop: true, vinted: true })
 
         const items = ref([])
 
@@ -683,6 +718,40 @@ createApp({
 
         }
 
+        
+        const showSuggestions = Vue.ref(false)
+        const locationSuggestions = Vue.ref([])
+        const isSearchingLocation = Vue.ref(false)
+        let locationTimeout = null
+
+        const handleLocationInput = () => {
+            if (locationTimeout) clearTimeout(locationTimeout)
+            if (!settings.value.location || settings.value.location.length < 3) {
+                showSuggestions.value = false
+                locationSuggestions.value = []
+                return
+            }
+            locationTimeout = setTimeout(async () => {
+                isSearchingLocation.value = true
+                try {
+                    const res = await fetch('/api/location/search?q=' + encodeURIComponent(settings.value.location))
+                    if (res.ok) {
+                        locationSuggestions.value = await res.json()
+                        showSuggestions.value = locationSuggestions.value.length > 0
+                    }
+                } catch (e) {
+                    console.error("Geocoding failed", e)
+                } finally {
+                    isSearchingLocation.value = false
+                }
+            }, 500)
+        }
+
+        const selectLocation = (loc) => {
+            settings.value.location = loc.display_name
+            showSuggestions.value = false
+        }
+
         const saveSearch = async () => {
             if (!formSearch.value.keywords) return alert('Keywords are required')
             if (!formSearch.value.wallapop && !formSearch.value.vinted) return alert('Select at least one platform')
@@ -750,7 +819,7 @@ createApp({
             isEditing.value = false
             editingId.value = null
             quickUrl.value = ''
-            formSearch.value = { keywords: '', distance_index: 3, wallapop: true, vinted: true }; minPriceIndex.value = 0; maxPriceIndex.value = 36;
+            formSearch.value = { keywords: '', distance_index: 3, condition: '', wallapop: true, vinted: true }; minPriceIndex.value = 0; maxPriceIndex.value = 36;
         }
 
         const deleteSearch = async (id) => {
@@ -774,6 +843,7 @@ createApp({
                 { key: 'telegram_token', value: settings.value.telegram_token },
                 { key: 'allowed_chat_ids', value: settings.value.allowed_chat_ids },
                 { key: 'region', value: settings.value.region },
+                { key: 'location', value: settings.value.location },
                 { key: 'wallapop_interval', value: String(settings.value.wallapop_interval) },
                 { key: 'vinted_interval', value: String(settings.value.vinted_interval) }
             ]
@@ -799,6 +869,13 @@ createApp({
         })
 
         return {
+
+            showSuggestions,
+            locationSuggestions,
+            isSearchingLocation,
+            handleLocationInput,
+            selectLocation,
+
             t,
             currentRoute,
             navigate,

@@ -15,7 +15,7 @@ USER_AGENTS = [
     "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36"
 ]
 
-def search_items(keywords: str, min_price: Optional[float] = None, max_price: Optional[float] = None, distance_in_km: Optional[int] = None) -> List[Dict]:
+def search_items(keywords: str, min_price: Optional[float] = None, max_price: Optional[float] = None, distance_in_km: Optional[int] = None, condition: Optional[str] = None) -> List[Dict]:
     """
     Search for items on Wallapop.
     """
@@ -28,8 +28,8 @@ def search_items(keywords: str, min_price: Optional[float] = None, max_price: Op
     params = {
         "keywords": keywords,
         "order_by": "newest",
-        "latitude": 41.4231,
-        "longitude": 2.188,
+        "latitude": float(get_setting("latitude", "40.4165")),
+        "longitude": float(get_setting("longitude", "-3.70256")),
         "country_code": region.upper(),
         "time_filter": "today",
         "source": "search_box"
@@ -42,6 +42,19 @@ def search_items(keywords: str, min_price: Optional[float] = None, max_price: Op
         params["min_sale_price"] = min_price
     if max_price is not None:
         params["max_sale_price"] = max_price
+
+    if condition:
+        # Map generic condition to Wallapop condition
+        w_map = {
+            "new": "new",
+            "mint": "as_good_as_new",
+            "good": "good",
+            "fair": "fair",
+            "poor": "has_given_it_all"
+        }
+        mapped = w_map.get(condition)
+        if mapped:
+            params["condition"] = mapped
 
     session = requests.Session()
     retries = 0
