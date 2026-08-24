@@ -172,8 +172,20 @@
             color: theme('colors.on-background');
         }
     </style>
+<script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+<script>
+  // Remove useless UI elements
+  document.addEventListener("DOMContentLoaded", () => {
+    document.querySelectorAll('nav').forEach(n => n.remove());
+    document.querySelectorAll('button').forEach(b => {
+      if(b.innerText.includes('Sign In') || b.innerText.includes('Support') || b.innerText.includes('Settings')) {
+          b.remove();
+      }
+    });
+  });
+</script>
 </head>
-<body class="flex min-h-screen bg-background">
+<body class="bg-surface text-on-surface min-h-screen flex flex-col font-sans"><div id="app">
 <!-- TopAppBar Mobile -->
 <header class="md:hidden flex justify-between items-center px-gutter h-16 w-full bg-primary text-on-primary shadow-md fixed top-0 z-50">
 <div class="text-headline-lg-mobile font-headline-lg-mobile text-on-primary">Wallatrack</div>
