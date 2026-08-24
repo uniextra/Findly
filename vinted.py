@@ -2,6 +2,7 @@ import requests
 import logging
 import random
 from typing import List, Dict, Optional
+from database import get_setting
 
 logger = logging.getLogger(__name__)
 
@@ -16,7 +17,10 @@ def search_vinted(keywords: str, min_price: Optional[float] = None, max_price: O
     """
     Search for items on Vinted.
     """
-    url = "https://www.vinted.es/api/v2/catalog/items"
+    region = get_setting("region", "es").lower()
+    domain = "co.uk" if region == "uk" else region
+    
+    url = f"https://www.vinted.{domain}/api/v2/catalog/items"
     
     params = {
         "search_text": keywords,
@@ -38,14 +42,14 @@ def search_vinted(keywords: str, min_price: Optional[float] = None, max_price: O
             headers = {
                 "User-Agent": random.choice(USER_AGENTS),
                 "Accept": "application/json, text/plain, */*",
-                "Accept-Language": "es-ES,es;q=0.9",
-                "Host": "www.vinted.es"
+                "Accept-Language": f"{region}-{region.upper()},en;q=0.9",
+                "Host": f"www.vinted.{domain}"
             }
             session.headers.update(headers)
             
             # Fetch cookies if we don't have them
             if 'access_token_web' not in [c.name for c in session.cookies]:
-                session.get("https://www.vinted.es/", timeout=10)
+                session.get(f"https://www.vinted.{domain}/", timeout=10)
             
             logger.info(f"Searching Vinted (Attempt {retries+1}/{max_retries}): {keywords}")
             response = session.get(url, params=params, timeout=10)

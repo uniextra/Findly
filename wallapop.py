@@ -2,6 +2,7 @@ import requests
 import logging
 import random
 from typing import List, Dict, Optional
+from database import get_setting
 
 logger = logging.getLogger(__name__)
 
@@ -18,6 +19,10 @@ def search_items(keywords: str, min_price: Optional[float] = None, max_price: Op
     """
     Search for items on Wallapop.
     """
+    region = get_setting("region", "es").lower()
+    if region not in ["es", "it", "pt"]:
+        region = "es" # Wallapop only operates in these 3
+        
     url = f"{BASE_URL}/search?"
     
     params = {
@@ -25,7 +30,7 @@ def search_items(keywords: str, min_price: Optional[float] = None, max_price: Op
         "order_by": "newest",
         "latitude": 41.4231,
         "longitude": 2.188,
-        "country_code": "ES",
+        "country_code": region.upper(),
         "time_filter": "today",
         "source": "search_box"
     }
@@ -51,8 +56,8 @@ def search_items(keywords: str, min_price: Optional[float] = None, max_price: Op
                 "Accept-Language": "en",
                 "Connection": "keep-alive",
                 "Host": "api.wallapop.com",
-                "Origin": "https://es.wallapop.com",
-                "Referer": "https://es.wallapop.com/",
+                "Origin": f"https://{region}.wallapop.com",
+                "Referer": f"https://{region}.wallapop.com/",
                 "X-DeviceOS": "0"
             }
             session.headers.update(headers)
@@ -64,7 +69,7 @@ def search_items(keywords: str, min_price: Optional[float] = None, max_price: Op
                 logger.warning(f"Wallapop API returned {response.status_code}. Resetting session.")
                 session.cookies.clear()
                 # Dummy request to regenerate basic cookies/fingerprint
-                session.get("https://es.wallapop.com/", timeout=10)
+                session.get(f"https://{region}.wallapop.com/", timeout=10)
                 retries += 1
                 continue
                 
@@ -108,7 +113,7 @@ def search_items(keywords: str, min_price: Optional[float] = None, max_price: Op
                             "title": title,
                             "price": price,
                             "currency": currency,
-                            "url": f"https://es.wallapop.com/item/{url_slug}" if url_slug else None,
+                            "url": f"https://{region}.wallapop.com/item/{url_slug}" if url_slug else None,
                             "image": image,
                             "platform": "Wallapop"
                         })

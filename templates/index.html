@@ -271,7 +271,20 @@
 
                 <!-- Scraping Intervals Box -->
                 <div class="bg-white p-6 rounded-xl border border-gray-200 shadow-sm">
-                    <h3 class="text-lg font-semibold mb-6 flex items-center gap-2 text-gray-800"><span class="material-symbols-outlined text-primary">schedule</span> Scraping Intervals</h3>
+                    <h3 class="text-lg font-semibold mb-6 flex items-center gap-2 text-gray-800"><span class="material-symbols-outlined text-primary">schedule</span> Scraping & Region</h3>
+                    
+                    <div class="mb-6">
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Base Region</label>
+                        <select v-model="settings.region" class="w-full rounded-md border-gray-300 shadow-sm py-2 px-3 focus:border-primary focus:ring-primary">
+                            <option value="es">Spain (es)</option>
+                            <option value="fr">France (fr)</option>
+                            <option value="it">Italy (it)</option>
+                            <option value="pt">Portugal (pt)</option>
+                            <option value="uk">United Kingdom (co.uk)</option>
+                        </select>
+                        <p class="text-xs text-gray-500 mt-1">Select the country to adapt platform search domains.</p>
+                    </div>
+
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-1">Wallapop Check Interval (minutes)</label>
@@ -304,7 +317,7 @@ createApp({
         const currentRoute = ref('dashboard')
         const stats = ref({ active_searches: 0, total_items: 0, bot_status: 'Loading...' })
         const searches = ref([])
-        const settings = ref({ telegram_token: '', allowed_chat_ids: '' })
+        const settings = ref({ telegram_token: '', allowed_chat_ids: '', region: 'es' })
         
         
         const shakeForm = ref(false)
@@ -360,13 +373,25 @@ createApp({
 
 
         const getWallapopUrl = (s) => {
-            let u = new URL('https://es.wallapop.com/search');
+            const r = settings.value.region === 'it' || settings.value.region === 'pt' ? settings.value.region : 'es';
+            let u = new URL(`https://${r}.wallapop.com/search`);
             u.searchParams.set('keywords', s.keywords);
             u.searchParams.set('order_by', 'newest');
             u.searchParams.set('time_filter', 'today');
             if (s.min_price) u.searchParams.set('min_sale_price', s.min_price);
             if (s.max_price) u.searchParams.set('max_sale_price', s.max_price);
             if (s.distance_in_km) u.searchParams.set('distance_in_km', s.distance_in_km);
+            return u.toString();
+        }
+
+        const getVintedUrl = (s) => {
+            const r = settings.value.region || 'es';
+            const domain = r === 'uk' ? 'co.uk' : r;
+            let u = new URL(`https://www.vinted.${domain}/catalog`);
+            u.searchParams.set('search_text', s.keywords);
+            u.searchParams.set('order', 'newest_first');
+            if (s.min_price) u.searchParams.set('price_from', s.min_price);
+            if (s.max_price) u.searchParams.set('price_to', s.max_price);
             return u.toString();
         }
 
@@ -527,6 +552,7 @@ createApp({
             const payload = [
                 { key: 'telegram_token', value: settings.value.telegram_token },
                 { key: 'allowed_chat_ids', value: settings.value.allowed_chat_ids },
+                { key: 'region', value: settings.value.region },
                 { key: 'wallapop_interval', value: String(settings.value.wallapop_interval) },
                 { key: 'vinted_interval', value: String(settings.value.vinted_interval) }
             ]

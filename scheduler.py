@@ -118,8 +118,13 @@ async def check_single_search(search_id: int, queue: asyncio.Queue, platform_ove
                         'reply_markup': reply_markup
                     })
         
+
         if new_items_count > max_items_to_notify:
-            base_web_url = "https://es.wallapop.com/search"
+            region = get_setting("region", "es").lower()
+            wallapop_region = region if region in ["es", "it", "pt"] else "es"
+            vinted_domain = "co.uk" if region == "uk" else region
+            
+            base_web_url = f"https://{wallapop_region}.wallapop.com/search"
             params = {
                 "keywords": search.keywords,
                 "order_by": "newest",
@@ -129,17 +134,21 @@ async def check_single_search(search_id: int, queue: asyncio.Queue, platform_ove
             if search.max_price: params["max_sale_price"] = search.max_price
                 
             web_url = f"{base_web_url}?{urllib.parse.urlencode(params)}"
+            vinted_url = f"https://www.vinted.{vinted_domain}/catalog?search_text={search.keywords}"
             
             summary_msg = (
-                f"📈 <b>Se han encontrado {new_items_count} artículos nuevos.</b>\n"
-                f"Solo se han mostrado los primeros {max_items_to_notify}.\n"
+                f"⚠️ <b>Se han encontrado {new_items_count} artículos nuevos.</b>
+"
+                f"Solo se han mostrado los primeros {max_items_to_notify}.
+"
             )
             if target_platform == "wallapop":
                  summary_msg += f"<a href='{web_url}'>Ver todos los resultados en Wallapop</a>"
             elif target_platform == "vinted":
-                 summary_msg += f"<a href='https://www.vinted.es/catalog?search_text={search.keywords}'>Ver todos los resultados en Vinted</a>"
+                 summary_msg += f"<a href='{vinted_url}'>Ver todos los resultados en Vinted</a>"
             else:
-                 summary_msg += f"<a href='{web_url}'>Ver en Wallapop</a> | <a href='https://www.vinted.es/catalog?search_text={search.keywords}'>Ver en Vinted</a>"
+                 summary_msg += f"<a href='{web_url}'>Ver en Wallapop</a> | <a href='{vinted_url}'>Ver en Vinted</a>"
+
                  
             keyboard = [[InlineKeyboardButton("❌ Dejar de seguir", callback_data=f"delete_{search.id}")]]
             reply_markup = InlineKeyboardMarkup(keyboard)
