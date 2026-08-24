@@ -26,9 +26,15 @@ def restricted(func):
         
         if update.message and update.message.text:
             msg_text = update.message.text.strip()
-            if len(msg_text) == 5 and msg_text.isalnum():
+            
+            # Check if it's a code or /link CODE
+            possible_code = msg_text
+            if msg_text.lower().startswith("/link "):
+                possible_code = msg_text[6:].strip()
+                
+            if len(possible_code) == 5 and possible_code.isalnum():
                 from pairing import claim_code
-                if claim_code(msg_text.upper(), chat_id):
+                if claim_code(possible_code.upper(), chat_id):
                     await update.message.reply_text(t("chat_paired", get_setting("region", "es")))
                     return
 
@@ -167,7 +173,7 @@ async def list_searches(update: Update, context: ContextTypes.DEFAULT_TYPE):
     region = get_setting('region', 'es')
     db: Session = get_db_session()
     try:
-        searches = db.query(Search).filter(Search.chat_id == update.effective_chat.id).all()
+        searches = db.query(Search).all()
         if not searches:
             await update.message.reply_text("📒 No tienes búsquedas activas.")
             return
@@ -200,7 +206,7 @@ async def button_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
             search_id = int(data.split("_")[1])
             db = SessionLocal()
             try:
-                search = db.query(Search).filter(Search.id == search_id, Search.chat_id == query.message.chat_id).first()
+                search = db.query(Search).filter(Search.id == search_id).first()
                 if search:
                     # Optional: delete associated SeenItem
                     db.query(SeenItem).filter(SeenItem.search_id == search.id).delete()
@@ -235,7 +241,7 @@ async def delete_search(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     db: Session = get_db_session()
     try:
-        search = db.query(Search).filter(Search.id == search_id, Search.chat_id == update.effective_chat.id).first()
+        search = db.query(Search).filter(Search.id == search_id).first()
         if search:
             db.delete(search)
             db.commit()
@@ -245,3 +251,13 @@ async def delete_search(update: Update, context: ContextTypes.DEFAULT_TYPE):
     finally:
         db.close()
 
+
+async def handle_link(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    chat_id = update.effective_chat.id
+    if not context.args:
+        return
+    possible_code = context.args[0].strip()
+    if len(possible_code) == 5 and possible_code.isalnum():
+        from pairing import claim_code
+        if claim_code(possible_code.upper(), chat_id):
+            await update.message.reply_text(t("chat_paired", get_setting("region", "es")))

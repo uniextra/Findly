@@ -5,7 +5,7 @@ import sys
 from telegram.ext import Application, CommandHandler, CallbackQueryHandler, MessageHandler, filters
 from database import init_db, get_setting, cleanup_old_items
 from i18n import t
-from handlers import start, add_search, list_searches, delete_search, button_callback, handle_message
+from handlers import start, add_search, list_searches, delete_search, button_callback, handle_message, handle_link
 from scheduler import platform_scheduler_loop, telegram_notifier_loop
 
 # Configure logging
@@ -74,6 +74,7 @@ def main():
 
     # Add Handlers
     application.add_handler(CommandHandler("start", start))
+    application.add_handler(CommandHandler("link", handle_link))
     application.add_handler(CommandHandler("add", add_search))
     application.add_handler(CommandHandler("list", list_searches))
     application.add_handler(CommandHandler("delete", delete_search))

@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8"/>
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-    <title>Findly - Dashboard</title>
+    <title>Findly</title>
     <link rel="icon" type="image/png" href="/static/favicon.png">
     <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
     <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
@@ -48,18 +48,18 @@
             </span>
         </div>
         <nav class="flex-1 p-4 space-y-2 overflow-y-auto">
-            <a @click="currentRoute = 'dashboard'" :class="currentRoute === 'dashboard' ? 'bg-primary text-white' : 'text-gray-600 hover:bg-gray-100'" class="flex items-center gap-3 px-4 py-3 rounded-lg cursor-pointer transition-colors">
-                <span class="material-symbols-outlined">dashboard</span> Dashboard
+            <a @click="navigate('dashboard')" :class="currentRoute === 'dashboard' ? 'bg-primary text-white' : 'text-gray-600 hover:bg-gray-100'" class="flex items-center gap-3 px-4 py-3 rounded-lg cursor-pointer transition-colors">
+                <span class="material-symbols-outlined">dashboard</span> {{ t('dashboard') }}
             </a>
-            <a @click="currentRoute = 'searches'" :class="currentRoute === 'searches' ? 'bg-primary text-white' : 'text-gray-600 hover:bg-gray-100'" class="flex items-center gap-3 px-4 py-3 rounded-lg cursor-pointer transition-colors">
-                <span class="material-symbols-outlined">manage_search</span> Searches
+            <a @click="navigate('searches')" :class="currentRoute === 'searches' ? 'bg-primary text-white' : 'text-gray-600 hover:bg-gray-100'" class="flex items-center gap-3 px-4 py-3 rounded-lg cursor-pointer transition-colors">
+                <span class="material-symbols-outlined">manage_search</span> {{ t('searches') }}
             </a>
             
-            <a @click="currentRoute = 'items'" :class="currentRoute === 'items' ? 'bg-primary text-white' : 'text-gray-600 hover:bg-gray-100'" class="flex items-center gap-3 px-4 py-3 rounded-lg cursor-pointer transition-colors">
-                <span class="material-symbols-outlined">list_alt</span> Seen Items
+            <a @click="navigate('items')" :class="currentRoute === 'items' ? 'bg-primary text-white' : 'text-gray-600 hover:bg-gray-100'" class="flex items-center gap-3 px-4 py-3 rounded-lg cursor-pointer transition-colors">
+                <span class="material-symbols-outlined">list_alt</span> {{ t('seen_items') }}
             </a>
-            <a @click="currentRoute = 'settings'" :class="currentRoute === 'settings' ? 'bg-primary text-white' : 'text-gray-600 hover:bg-gray-100'" class="flex items-center gap-3 px-4 py-3 rounded-lg cursor-pointer transition-colors">
-                <span class="material-symbols-outlined">settings</span> Settings
+            <a @click="navigate('settings')" :class="currentRoute === 'settings' ? 'bg-primary text-white' : 'text-gray-600 hover:bg-gray-100'" class="flex items-center gap-3 px-4 py-3 rounded-lg cursor-pointer transition-colors">
+                <span class="material-symbols-outlined">settings</span> {{ t('settings') }}
             </a>
         </nav>
     </aside>
@@ -68,7 +68,7 @@
     <main class="flex-1 flex flex-col h-full overflow-hidden bg-gray-50">
         <!-- Header -->
         <header class="h-16 bg-white border-b border-gray-200 flex items-center px-6 md:px-8">
-            <h1 class="text-2xl font-semibold capitalize">{{ currentRoute }}</h1>
+            <h1 class="text-2xl font-semibold capitalize">{{ currentRoute === 'items' ? t('seen_items') : t(currentRoute) }}</h1>
         </header>
 
         <!-- Dynamic Content -->
@@ -85,7 +85,7 @@
                     <div class="text-2xl font-semibold text-gray-900">{{ stats.active_searches }}</div>
                 </div>
                 <div class="bg-white p-6 rounded-xl border border-gray-200 shadow-sm">
-                    <div class="text-sm font-medium text-gray-500 mb-1">Items Found (All Time)</div>
+                    <div class="text-sm font-medium text-gray-500 mb-1">{{ t('items_found_all_time') }}</div>
                     <div class="text-2xl font-semibold text-gray-900">{{ stats.total_items }}</div>
                 </div>
             </div>
@@ -157,7 +157,7 @@
                         <div class="lg:col-span-3 flex justify-end items-end gap-2">
                             <button v-if="isEditing" @click="cancelEdit" type="button" class="px-6 py-2 rounded-lg text-gray-700 border border-gray-300 hover:bg-gray-50 transition-colors">{{ t('cancel') }}</button>
                             <button @click="saveSearch" type="button" class="bg-primary text-white px-6 py-2 rounded-lg font-medium hover:bg-[#005a62] transition-colors shadow-sm flex items-center gap-2">
-                                <span class="material-symbols-outlined text-[18px]">{{ isEditing ? 'save' : 'add' }}</span> {{ isEditing ? 'Save Changes' : 'Add Search' }}
+                                <span class="material-symbols-outlined text-[18px]">{{ isEditing ? 'save' : 'add' }}</span> {{ isEditing ? t('save_changes') : t('add_search') }}
                             </button>
                         </div>
                     </form>
@@ -173,7 +173,7 @@
                                     <th class="py-3 px-4">{{ t('keywords') }}</th>
                                     <th class="py-3 px-4">{{ t('price_range') }}</th>
                                     <th class="py-3 px-4">{{ t('distance') }}</th>
-                                    <th class="py-3 px-4">Platform</th>
+                                    <th class="py-3 px-4">{{ t('platform') }}</th>
                                     <th class="py-3 px-4">{{ t('added_on') }}</th>
                                     <th class="py-3 px-4">{{ t('last_checked') }}</th>
                                     <th class="py-3 px-4 text-right">{{ t('actions') }}</th>
@@ -223,11 +223,11 @@
                             <thead>
                                 <tr class="bg-gray-50 border-b border-gray-200 text-sm font-semibold text-gray-600">
                                     <th class="py-3 px-4">{{ t('id') }}</th>
-                                    <th class="py-3 px-4">Search Keywords</th>
-                                    <th class="py-3 px-4">Item Title</th>
+                                    <th class="py-3 px-4">{{ t('search_keywords') }}</th>
+                                    <th class="py-3 px-4">{{ t('item_title') }}</th>
                                     <th class="py-3 px-4">{{ t('price') }}</th>
                                     <th class="py-3 px-4">{{ t('found_at') }}</th>
-                                    <th class="py-3 px-4">Link</th>
+                                    <th class="py-3 px-4">{{ t('link') }}</th>
                                 </tr>
                             </thead>
                             <tbody class="divide-y divide-gray-200">
@@ -238,12 +238,12 @@
                                     <td class="py-3 px-4 text-sm">{{ item.price ? '€'+item.price : '-' }}</td>
                                     <td class="py-3 px-4 text-sm text-gray-500">{{ formatTime(item.found_at) }}</td>
                                     <td class="py-3 px-4 text-sm">
-                                        <a v-if="item.url" :href="item.url" target="_blank" class="text-primary hover:underline">View Item</a>
+                                        <a v-if="item.url" :href="item.url" target="_blank" class="text-primary hover:underline">{{ t('view_item') }}</a>
                                         <span v-else class="text-gray-400">-</span>
                                     </td>
                                 </tr>
                                 <tr v-if="items.length === 0">
-                                    <td colspan="6" class="py-6 text-center text-gray-500">No items found yet.</td>
+                                    <td colspan="6" class="py-6 text-center text-gray-500">{{ t('no_items_found') }}</td>
                                 </tr>
                             </tbody>
                         </table>
@@ -260,7 +260,7 @@
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-1">{{ t('telegram_token') }}</label>
                             <input v-model="settings.telegram_token" type="password" class="w-full rounded-md border-gray-300 shadow-sm py-2 px-3 focus:border-primary focus:ring-primary" placeholder="123456:ABC-DEF1234ghIkl-zyx57W2v1u123ew11">
-                            <p class="text-xs text-gray-500 mt-1">Token generated by BotFather in Telegram.</p>
+                            <p class="text-xs text-gray-500 mt-1">{{ t('token_generated_by') }}</p>
                         </div>
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-1">{{ t('allowed_chat_ids') }}</label>
@@ -268,7 +268,7 @@
                                   <input type="text" v-model="settings.allowed_chat_ids" :placeholder="t('comma_separated_ids')" class="flex-1 w-full rounded-md border-gray-300 shadow-sm py-2 px-3 focus:border-primary focus:ring-primary">
                                   <button type="button" @click="openPairingModal" class="bg-gray-100 hover:bg-gray-200 text-gray-800 font-bold py-2 px-4 rounded border border-gray-300 transition-colors">+</button>
                               </div>
-                            <p class="text-xs text-gray-500 mt-1">Users or groups allowed to use the bot and receive notifications.</p>
+                            <p class="text-xs text-gray-500 mt-1">{{ t('users_or_groups_allowed') }}</p>
                         </div>
                     </div>
                 </div>
@@ -291,11 +291,11 @@
 
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Wallapop Check Interval (minutes)</label>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">{{ t('wallapop_interval') }}</label>
                             <input v-model="settings.wallapop_interval" type="number" min="1" class="w-full rounded-md border-gray-300 shadow-sm py-2 px-3 focus:border-primary focus:ring-primary" placeholder="5">
                         </div>
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Vinted Check Interval (minutes)</label>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">{{ t('vinted_interval') }}</label>
                             <input v-model="settings.vinted_interval" type="number" min="1" class="w-full rounded-md border-gray-300 shadow-sm py-2 px-3 focus:border-primary focus:ring-primary" placeholder="5">
                         </div>
                     </div>
@@ -304,7 +304,7 @@
                 <!-- Save Button Box -->
                 <div class="flex justify-end pt-2">
                     <button @click="saveSettings" type="button" class="bg-primary text-white px-8 py-3 rounded-lg font-medium hover:bg-[#005a62] transition-colors shadow-sm text-base flex items-center gap-2">
-                        <span class="material-symbols-outlined text-[20px]">save</span> Save & Restart Bot
+                        <span class="material-symbols-outlined text-[20px]">save</span> {{ t('save_settings') }}
                     </button>
                 </div>
             </div>
@@ -321,17 +321,36 @@
                     <div class="sm:flex sm:items-start">
                         <div class="mt-3 text-center sm:mt-0 sm:ml-4 sm:text-left w-full">
                             <h3 class="text-lg leading-6 font-medium text-gray-900" id="modal-title">{{ t('add_chat_id') }}</h3>
-                            <div class="mt-4" v-if="pairingMode === 'select'">
-                                <button @click="startAutoPairing" class="w-full mb-3 bg-primary text-white py-2 px-4 rounded hover:bg-green-600 transition">{{ t('auto_obtain_id') }}</button>
-                                <button @click="pairingMode = 'manual'" class="w-full bg-gray-100 text-gray-800 py-2 px-4 rounded border hover:bg-gray-200 transition">{{ t('manual_enter_id') }}</button>
+                            
+                            <div v-if="pairingStatusMsg" :class="pairingStatusType === 'success' ? 'bg-green-100 text-green-700 border-green-200' : 'bg-red-100 text-red-700 border-red-200'" class="mt-4 px-4 py-3 rounded border text-sm font-semibold text-center transition-all">
+                                {{ pairingStatusMsg }}
                             </div>
-                            <div class="mt-4" v-if="pairingMode === 'manual'">
-                                <input type="text" v-model="manualChatId" :placeholder="t('enter_chat_id')" class="w-full rounded-md border-gray-300 shadow-sm py-2 px-3 focus:border-primary focus:ring-primary mb-3">
-                                <button @click="confirmManualChatId" class="w-full bg-primary text-white py-2 px-4 rounded hover:bg-green-600 transition">{{ t('confirm') }}</button>
+
+                            <div class="mt-4" v-if="pairingMode === 'select'">
+                                <button @click="startAutoPairing" class="w-full mb-4 bg-primary text-white py-3 px-4 rounded-lg font-medium hover:bg-green-600 transition flex items-center justify-center gap-2 shadow-sm">
+                                    <span class="material-symbols-outlined">smart_toy</span>
+                                    {{ t('auto_obtain_id') }}
+                                </button>
+                                
+                                <div class="relative flex py-2 items-center">
+                                    <div class="flex-grow border-t border-gray-200"></div>
+                                </div>
+
+                                <div class="mt-2 flex gap-2">
+                                    <input type="text" v-model="manualChatId" :placeholder="t('enter_chat_id')" class="flex-1 rounded-md border-gray-300 shadow-sm py-2 px-3 focus:border-primary focus:ring-primary">
+                                    <button @click="confirmManualChatId" class="bg-gray-100 text-gray-800 py-2 px-4 rounded-md border border-gray-300 hover:bg-gray-200 transition font-medium">
+                                        {{ t('add_chat_id') }}
+                                    </button>
+                                </div>
                             </div>
                             <div class="mt-6 text-center" v-if="pairingMode === 'auto'">
                                 <p class="text-sm text-gray-500 mb-2">{{ t('send_code_to_bot') }}</p>
-                                <div class="text-5xl font-bold tracking-widest my-6 text-gray-800">{{ pairingCode }}</div>
+                                <div class="flex items-center justify-center gap-2 my-6">
+                                    <div class="text-3xl font-bold tracking-widest text-gray-800 bg-gray-50 px-4 py-2 rounded-lg border border-gray-200">/link {{ pairingCode }}</div>
+                                    <button @click="copyToClipboard('/link ' + pairingCode)" class="p-2 bg-gray-100 hover:bg-gray-200 text-gray-600 rounded-lg transition border border-gray-300 flex items-center justify-center" title="Copiar">
+                                        <span class="material-symbols-outlined">content_copy</span>
+                                    </button>
+                                </div>
                                 <p class="text-sm font-semibold text-red-500">{{ t('expires_in') }} {{ pairingTimeLeft }}s</p>
                             </div>
                         </div>
@@ -352,89 +371,73 @@ const { createApp, ref, onMounted } = Vue
 createApp({
     setup() {
         
-        const i18n = {
+                const i18n = {
             es: {
-                dashboard: "Panel", searches: "Búsquedas", settings: "Ajustes",
+                dashboard: "Panel", searches: "Búsquedas", settings: "Ajustes", seen_items: "Artículos Vistos",
                 active_searches: "Búsquedas Activas", total_items_found: "Artículos Encontrados", bot_status: "Estado del Bot",
                 add_new_tracking_query: "Añadir Nueva Búsqueda", edit_search: "Editar Búsqueda",
-                quick_add_via_url: "Añadir rápido por URL", paste_url: "Pega una URL de Wallapop o Vinted aquí para autocompletar.",
+                quick_add_via_url: "Añadir rápido por URL", paste_url: "Pega una URL de Wallapop o Vinted aquí.",
                 keywords: "Palabras Clave", eg_iphone: "ej. iphone 13 pro", price_range: "Rango de Precio",
                 distance: "Distancia", any: "Cualquiera", platforms: "Plataformas", wallapop: "Wallapop", vinted: "Vinted",
-                cancel: "Cancelar", save_search: "Guardar Búsqueda", add_search: "Añadir Búsqueda",
-                id: "ID", added_on: "Añadido El", last_checked: "Última Comprobación", actions: "Acciones",
-                title: "Título", price: "Precio", found_at: "Encontrado El",
-                scraping_region: "Scraping y Región", base_region: "Región Base",
                 select_country: "Selecciona el país para adaptar las búsquedas.",
                 wallapop_interval: "Intervalo Wallapop (min)", vinted_interval: "Intervalo Vinted (min)",
                 telegram_config: "Configuración Telegram", telegram_token: "Token del Bot", allowed_chat_ids: "IDs de Chat Permitidos",
-                comma_separated_ids: "IDs separados por coma", save_settings: "Guardar Ajustes", add_chat_id: "Añadir Chat ID", auto_obtain_id: "Auto-Obtener ID", manual_enter_id: "Introducir Manualmente", enter_chat_id: "Introduce el Chat ID", confirm: "Confirmar", send_code_to_bot: "Envía este código al bot en Telegram:", expires_in: "Caduca en", code_expired: "El código ha caducado. Inténtalo de nuevo.", chat_added_success: "¡Chat añadido con éxito!"
+                comma_separated_ids: "IDs separados por coma", save_settings: "Guardar Ajustes", add_chat_id: "Añadir Chat ID", auto_obtain_id: "Auto-Obtener ID", manual_enter_id: "Introducir Manualmente", enter_chat_id: "Introduce el Chat ID", confirm: "Confirmar", send_code_to_bot: "Añade el bot al grupo/chat deseado y envía este comando:", expires_in: "Caduca en", code_expired: "El código ha caducado. Inténtalo de nuevo.", chat_added_success: "¡Chat añadido con éxito!", unsaved_changes: "Tienes cambios sin guardar. ¿Seguro que quieres salir?",
+                items_found_all_time: "Artículos Encontrados (Total)", platform: "Plataforma", search_keywords: "Palabras Clave", item_title: "Título", link: "Enlace", view_item: "Ver Artículo", no_items_found: "Aún no se han encontrado artículos.", token_generated_by: "Token generado por BotFather en Telegram.", users_or_groups_allowed: "Usuarios o grupos permitidos para usar el bot y recibir notificaciones.", scraping_region: "Scraping y Región", base_region: "Región Base", added_on: "Añadido el", last_checked: "Última comprobación", actions: "Acciones", add_search: "Añadir Búsqueda", save_changes: "Guardar Cambios"
             },
             fr: {
-                dashboard: "Tableau de bord", searches: "Recherches", settings: "Paramètres",
+                dashboard: "Tableau de bord", searches: "Recherches", settings: "Paramètres", seen_items: "Articles Vus",
                 active_searches: "Recherches Actives", total_items_found: "Articles Trouvés", bot_status: "Statut du Bot",
                 add_new_tracking_query: "Ajouter Nouvelle Recherche", edit_search: "Modifier Recherche",
                 quick_add_via_url: "Ajout rapide via URL", paste_url: "Collez une URL Wallapop ou Vinted ici.",
                 keywords: "Mots-clés", eg_iphone: "ex. iphone 13 pro", price_range: "Gamme de Prix",
                 distance: "Distance", any: "Tous", platforms: "Plateformes", wallapop: "Wallapop", vinted: "Vinted",
-                cancel: "Annuler", save_search: "Enregistrer Recherche", add_search: "Ajouter Recherche",
-                id: "ID", added_on: "Ajouté Le", last_checked: "Dernière Vérification", actions: "Actions",
-                title: "Titre", price: "Prix", found_at: "Trouvé Le",
-                scraping_region: "Scraping et Région", base_region: "Région de Base",
                 select_country: "Sélectionnez le pays pour adapter les recherches.",
                 wallapop_interval: "Intervalle Wallapop (min)", vinted_interval: "Intervalle Vinted (min)",
                 telegram_config: "Configuration Telegram", telegram_token: "Token du Bot", allowed_chat_ids: "IDs de Chat Autorisés",
-                comma_separated_ids: "IDs séparés par des virgules", save_settings: "Enregistrer Paramètres", add_chat_id: "Ajouter ID Chat", auto_obtain_id: "Obtenir Automatiquement", manual_enter_id: "Saisir Manuellement", enter_chat_id: "Saisir ID Chat", confirm: "Confirmer", send_code_to_bot: "Envoyez ce code au bot sur Telegram:", expires_in: "Expire dans", code_expired: "Le code a expiré. Veuillez réessayer.", chat_added_success: "Chat ajouté avec succès !"
+                comma_separated_ids: "IDs séparés par des virgules", save_settings: "Enregistrer Paramètres", add_chat_id: "Ajouter ID Chat", auto_obtain_id: "Obtenir Automatiquement", manual_enter_id: "Saisir Manuellement", enter_chat_id: "Saisir ID Chat", confirm: "Confirmer", send_code_to_bot: "Ajoutez le bot au groupe/chat souhaité et envoyez cette commande :", expires_in: "Expire dans", code_expired: "Le code a expiré. Veuillez réessayer.", chat_added_success: "Chat ajouté avec succès !", unsaved_changes: "Vous avez des modifications non enregistrées. Voulez-vous vraiment quitter ?",
+                items_found_all_time: "Articles Trouvés (Total)", platform: "Plateforme", search_keywords: "Mots-clés", item_title: "Titre", link: "Lien", view_item: "Voir Article", no_items_found: "Aucun article trouvé pour l'instant.", token_generated_by: "Token généré par BotFather sur Telegram.", users_or_groups_allowed: "Utilisateurs ou groupes autorisés à utiliser le bot et recevoir des notifications.", scraping_region: "Scraping & Région", base_region: "Région de Base", added_on: "Ajouté le", last_checked: "Dernière vérification", actions: "Actions", add_search: "Ajouter Recherche", save_changes: "Enregistrer"
             },
             it: {
-                dashboard: "Pannello", searches: "Ricerche", settings: "Impostazioni",
+                dashboard: "Pannello", searches: "Ricerche", settings: "Impostazioni", seen_items: "Articoli Visti",
                 active_searches: "Ricerche Attive", total_items_found: "Articoli Trovati", bot_status: "Stato del Bot",
                 add_new_tracking_query: "Aggiungi Nuova Ricerca", edit_search: "Modifica Ricerca",
                 quick_add_via_url: "Aggiunta rapida tramite URL", paste_url: "Incolla un URL Wallapop o Vinted qui.",
                 keywords: "Parole Chiave", eg_iphone: "es. iphone 13 pro", price_range: "Fascia di Prezzo",
                 distance: "Distanza", any: "Qualsiasi", platforms: "Piattaforme", wallapop: "Wallapop", vinted: "Vinted",
-                cancel: "Annulla", save_search: "Salva Ricerca", add_search: "Aggiungi Ricerca",
-                id: "ID", added_on: "Aggiunto Il", last_checked: "Ultimo Controllo", actions: "Azioni",
-                title: "Titolo", price: "Prezzo", found_at: "Trovato Il",
-                scraping_region: "Scraping e Regione", base_region: "Regione di Base",
                 select_country: "Seleziona il paese per adattare le ricerche.",
                 wallapop_interval: "Intervallo Wallapop (min)", vinted_interval: "Intervallo Vinted (min)",
                 telegram_config: "Configurazione Telegram", telegram_token: "Token del Bot", allowed_chat_ids: "ID Chat Consentiti",
-                comma_separated_ids: "ID separati da virgola", save_settings: "Salva Impostazioni", add_chat_id: "Aggiungi ID Chat", auto_obtain_id: "Ottieni Automaticamente", manual_enter_id: "Inserisci Manualmente", enter_chat_id: "Inserisci ID Chat", confirm: "Conferma", send_code_to_bot: "Invia questo codice al bot su Telegram:", expires_in: "Scade in", code_expired: "Codice scaduto. Riprova.", chat_added_success: "Chat aggiunta con successo!"
+                comma_separated_ids: "ID separati da virgola", save_settings: "Salva Impostazioni", add_chat_id: "Aggiungi ID Chat", auto_obtain_id: "Ottieni Automaticamente", manual_enter_id: "Inserisci Manualmente", enter_chat_id: "Inserisci ID Chat", confirm: "Conferma", send_code_to_bot: "Aggiungi il bot al gruppo/chat desiderato e invia questo comando:", expires_in: "Scade in", code_expired: "Codice scaduto. Riprova.", chat_added_success: "Chat aggiunta con successo!", unsaved_changes: "Hai modifiche non salvate. Sei sicuro di voler uscire?",
+                items_found_all_time: "Articoli Trovati (Totale)", platform: "Piattaforma", search_keywords: "Parole Chiave", item_title: "Titolo", link: "Link", view_item: "Vedi Articolo", no_items_found: "Nessun articolo trovato finora.", token_generated_by: "Token generato da BotFather su Telegram.", users_or_groups_allowed: "Utenti o gruppi autorizzati a usare il bot e ricevere notifiche.", scraping_region: "Scraping e Regione", base_region: "Regione di Base", added_on: "Aggiunto il", last_checked: "Ultimo controllo", actions: "Azioni", add_search: "Aggiungi Ricerca", save_changes: "Salva Modifiche"
             },
             pt: {
-                dashboard: "Painel", searches: "Pesquisas", settings: "Configurações",
+                dashboard: "Painel", searches: "Pesquisas", settings: "Configurações", seen_items: "Artigos Vistos",
                 active_searches: "Pesquisas Ativas", total_items_found: "Artigos Encontrados", bot_status: "Estado do Bot",
                 add_new_tracking_query: "Adicionar Nova Pesquisa", edit_search: "Editar Pesquisa",
                 quick_add_via_url: "Adição rápida via URL", paste_url: "Cola um URL Wallapop ou Vinted aqui.",
                 keywords: "Palavras-chave", eg_iphone: "ex. iphone 13 pro", price_range: "Faixa de Preço",
                 distance: "Distância", any: "Qualquer", platforms: "Plataformas", wallapop: "Wallapop", vinted: "Vinted",
-                cancel: "Cancelar", save_search: "Guardar Pesquisa", add_search: "Adicionar Pesquisa",
-                id: "ID", added_on: "Adicionado Em", last_checked: "Última Verificação", actions: "Ações",
-                title: "Título", price: "Preço", found_at: "Encontrado Em",
-                scraping_region: "Scraping e Região", base_region: "Região Base",
                 select_country: "Seleciona o país para adaptar as pesquisas.",
                 wallapop_interval: "Intervalo Wallapop (min)", vinted_interval: "Intervalo Vinted (min)",
                 telegram_config: "Configuração Telegram", telegram_token: "Token do Bot", allowed_chat_ids: "IDs de Chat Permitidos",
-                comma_separated_ids: "IDs separados por vírgula", save_settings: "Guardar Configurações", add_chat_id: "Adicionar ID de Chat", auto_obtain_id: "Obter Automaticamente", manual_enter_id: "Inserir Manualmente", enter_chat_id: "Inserir ID de Chat", confirm: "Confirmar", send_code_to_bot: "Envia este código ao bot no Telegram:", expires_in: "Expira em", code_expired: "O código expirou. Tenta novamente.", chat_added_success: "Chat adicionado com sucesso!"
+                comma_separated_ids: "IDs separados por vírgula", save_settings: "Guardar Configurações", add_chat_id: "Adicionar ID de Chat", auto_obtain_id: "Obter Automaticamente", manual_enter_id: "Inserir Manualmente", enter_chat_id: "Inserir ID de Chat", confirm: "Confirmar", send_code_to_bot: "Adiciona o bot ao grupo/chat desejado e envia este comando:", expires_in: "Expira em", code_expired: "O código expirou. Tenta novamente.", chat_added_success: "Chat adicionado com sucesso!", unsaved_changes: "Tens alterações não guardadas. Tens a certeza que queres sair?",
+                items_found_all_time: "Artigos Encontrados (Total)", platform: "Plataforma", search_keywords: "Palavras-chave", item_title: "Título", link: "Link", view_item: "Ver Artigo", no_items_found: "Nenhum artigo encontrado ainda.", token_generated_by: "Token gerado pelo BotFather no Telegram.", users_or_groups_allowed: "Utilizadores ou grupos permitidos a usar o bot e receber notificações.", scraping_region: "Scraping & Região", base_region: "Região Base", added_on: "Adicionado em", last_checked: "Última verificação", actions: "Ações", add_search: "Adicionar Pesquisa", save_changes: "Guardar Alterações"
             },
             en: {
-                dashboard: "Dashboard", searches: "Searches", settings: "Settings",
+                dashboard: "Dashboard", searches: "Searches", settings: "Settings", seen_items: "Seen Items",
                 active_searches: "Active Searches", total_items_found: "Total Items Found", bot_status: "Bot Status",
                 add_new_tracking_query: "Add New Tracking Query", edit_search: "Edit Search",
                 quick_add_via_url: "Quick Add via URL", paste_url: "Paste a Wallapop or Vinted search URL here to auto-fill the form.",
                 keywords: "Keywords", eg_iphone: "e.g., iphone 13 pro", price_range: "Price Range",
                 distance: "Distance", any: "Any", platforms: "Platforms", wallapop: "Wallapop", vinted: "Vinted",
-                cancel: "Cancel", save_search: "Save Search", add_search: "Add Search",
-                id: "ID", added_on: "Added On", last_checked: "Last Checked", actions: "Actions",
-                title: "Title", price: "Price", found_at: "Found At",
-                scraping_region: "Scraping & Region", base_region: "Base Region",
-                select_country: "Select the country to adapt platform search domains.",
+                select_country: "Select the country to adapt searches.",
                 wallapop_interval: "Wallapop Interval (mins)", vinted_interval: "Vinted Interval (mins)",
                 telegram_config: "Telegram Configuration", telegram_token: "Telegram Bot Token", allowed_chat_ids: "Allowed Chat IDs",
-                comma_separated_ids: "Comma separated IDs", save_settings: "Save Settings", add_chat_id: "Add Chat ID", auto_obtain_id: "Auto-Obtain ID", manual_enter_id: "Enter Manually", enter_chat_id: "Enter Chat ID", confirm: "Confirm", send_code_to_bot: "Send this code to the bot on Telegram:", expires_in: "Expires in", code_expired: "The code expired. Please try again.", chat_added_success: "Chat added successfully!"
+                comma_separated_ids: "Comma separated IDs", save_settings: "Save Settings", add_chat_id: "Add Chat ID", auto_obtain_id: "Auto-Obtain ID", manual_enter_id: "Enter Manually", enter_chat_id: "Enter Chat ID", confirm: "Confirm", send_code_to_bot: "Add the bot to the desired group/chat and send this command:", expires_in: "Expires in", code_expired: "The code expired. Please try again.", chat_added_success: "Chat added successfully!", unsaved_changes: "You have unsaved changes. Are you sure you want to leave?",
+                items_found_all_time: "Items Found (All Time)", platform: "Platform", search_keywords: "Search Keywords", item_title: "Item Title", link: "Link", view_item: "View Item", no_items_found: "No items found yet.", token_generated_by: "Token generated by BotFather in Telegram.", users_or_groups_allowed: "Users or groups allowed to use the bot and receive notifications.", scraping_region: "Scraping & Region", base_region: "Base Region", added_on: "Added On", last_checked: "Last Checked", actions: "Actions", add_search: "Add Search", save_changes: "Save Changes"
             }
         }
-        
         const t = (key) => {
             const lang = settings.value.region === 'uk' ? 'en' : (settings.value.region || 'es')
             if (i18n[lang] && i18n[lang][key]) return i18n[lang][key]
@@ -446,6 +449,30 @@ createApp({
         const stats = ref({ active_searches: 0, total_items: 0, bot_status: 'Loading...' })
         const searches = ref([])
         const settings = ref({ telegram_token: '', allowed_chat_ids: '', region: 'es' })
+        const originalSettings = ref(null)
+
+        const navigate = (route) => {
+            if (currentRoute.value === 'settings' && route !== 'settings' && originalSettings.value) {
+                const s = settings.value;
+                const o = originalSettings.value;
+                const isChanged = (
+                    s.telegram_token !== o.telegram_token ||
+                    s.allowed_chat_ids !== o.allowed_chat_ids ||
+                    s.region !== o.region ||
+                    String(s.wallapop_interval) !== String(o.wallapop_interval) ||
+                    String(s.vinted_interval) !== String(o.vinted_interval)
+                );
+                
+                if (isChanged) {
+                    if (!confirm(t('unsaved_changes'))) {
+                        return
+                    }
+                    // Revert changes if they discard
+                    settings.value = JSON.parse(JSON.stringify(originalSettings.value))
+                }
+            }
+            currentRoute.value = route
+        }
         
         
         const shakeForm = ref(false)
@@ -529,11 +556,14 @@ createApp({
         const manualChatId = ref('')
         const pairingCode = ref('')
         const pairingTimeLeft = ref(0)
+        const pairingStatusMsg = ref('')
+        const pairingStatusType = ref('')
         let pairingInterval = null
 
         const openPairingModal = () => {
             pairingMode.value = 'select'
             manualChatId.value = ''
+            pairingStatusMsg.value = ''
             showPairingModal.value = true
         }
         const closePairingModal = () => {
@@ -550,6 +580,13 @@ createApp({
                 settings.value.allowed_chat_ids = current.join(',')
             }
         }
+        const copyToClipboard = async (text) => {
+            try {
+                await navigator.clipboard.writeText(text)
+            } catch (err) {
+                console.error('Failed to copy', err)
+            }
+        }
         const confirmManualChatId = () => {
             if(manualChatId.value) {
                 addChatIdToSettings(manualChatId.value)
@@ -558,6 +595,7 @@ createApp({
         }
         const startAutoPairing = async () => {
             pairingMode.value = 'auto'
+            pairingStatusMsg.value = ''
             const res = await fetch('/api/pairing/generate', {method: 'POST'})
             const data = await res.json()
             pairingCode.value = data.code
@@ -569,7 +607,8 @@ createApp({
                 if(pairingTimeLeft.value <= 0) {
                     clearInterval(pairingInterval)
                     pairingMode.value = 'select'
-                    alert(t('code_expired'))
+                    pairingStatusMsg.value = t('code_expired')
+                    pairingStatusType.value = 'error'
                     return
                 }
                 const statusRes = await fetch(`/api/pairing/status?code=${pairingCode.value}`)
@@ -577,8 +616,10 @@ createApp({
                 if(statusData.status === 'success') {
                     clearInterval(pairingInterval)
                     addChatIdToSettings(statusData.chat_id)
-                    closePairingModal()
-                    alert(t('chat_added_success'))
+                    pairingMode.value = 'select'
+                    pairingStatusMsg.value = t('chat_added_success')
+                    pairingStatusType.value = 'success'
+                    setTimeout(() => closePairingModal(), 2000)
                 }
             }, 1000)
         }
@@ -637,6 +678,7 @@ createApp({
             stats.value = resStats
             searches.value = resSearches
             settings.value = resSettings
+            originalSettings.value = JSON.parse(JSON.stringify(resSettings))
             items.value = resItems
 
         }
@@ -759,6 +801,7 @@ createApp({
         return {
             t,
             currentRoute,
+            navigate,
             stats,
             searches,
             settings,
@@ -775,8 +818,11 @@ createApp({
             manualChatId,
             pairingCode,
             pairingTimeLeft,
+            pairingStatusMsg,
+            pairingStatusType,
             closePairingModal,
             confirmManualChatId,
+            copyToClipboard,
             startAutoPairing,
             getWallapopUrl,
             getVintedUrl,

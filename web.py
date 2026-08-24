@@ -63,8 +63,10 @@ def get_settings():
         "vinted_interval": get_setting("vinted_interval", "5")
     }
 
+from fastapi import BackgroundTasks
+
 @app.post("/api/settings")
-def save_settings(settings: List[SettingUpdate]):
+def save_settings(settings: List[SettingUpdate], background_tasks: BackgroundTasks):
     db = SessionLocal()
     try:
         for s in settings:
@@ -74,9 +76,16 @@ def save_settings(settings: List[SettingUpdate]):
             else:
                 db.add(AppSetting(key=s.key, value=s.value))
         db.commit()
-        # Trigger bot restart
+        # Trigger bot restart after response is sent
         from main import restart_bot
-        restart_bot()
+        
+        # Delay the restart slightly to ensure the network socket is flushed
+        import time
+        def delayed_restart():
+            time.sleep(1)
+            restart_bot()
+            
+        background_tasks.add_task(delayed_restart)
         return {"success": True}
     except Exception as e:
         db.rollback()

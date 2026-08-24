@@ -18,26 +18,33 @@ async def telegram_notifier_loop(application: Application, queue: asyncio.Queue)
         try:
             message_data = await queue.get()
             msg_type = message_data.get('type')
-            chat_id = message_data.get('chat_id')
             
+            from database import get_setting
+            allowed_str = get_setting("allowed_chat_ids", "")
             try:
-                if msg_type == 'photo':
-                    await application.bot.send_photo(
-                        chat_id=chat_id,
-                        photo=message_data.get('photo'),
-                        caption=message_data.get('caption'),
-                        parse_mode=message_data.get('parse_mode', 'HTML'),
-                        reply_markup=message_data.get('reply_markup')
-                    )
-                elif msg_type == 'message':
-                    await application.bot.send_message(
-                        chat_id=chat_id,
-                        text=message_data.get('text'),
-                        parse_mode=message_data.get('parse_mode', 'HTML'),
-                        reply_markup=message_data.get('reply_markup')
-                    )
-            except Exception as e:
-                logger.error(f"Failed to send message to {chat_id}: {e}")
+                chat_ids = [int(cid.strip("'\" ")) for cid in allowed_str.split(',') if cid.strip()]
+            except:
+                chat_ids = []
+                
+            for chat_id in chat_ids:
+                try:
+                    if msg_type == 'photo':
+                        await application.bot.send_photo(
+                            chat_id=chat_id,
+                            photo=message_data.get('photo'),
+                            caption=message_data.get('caption'),
+                            parse_mode=message_data.get('parse_mode', 'HTML'),
+                            reply_markup=message_data.get('reply_markup')
+                        )
+                    elif msg_type == 'message':
+                        await application.bot.send_message(
+                            chat_id=chat_id,
+                            text=message_data.get('text'),
+                            parse_mode=message_data.get('parse_mode', 'HTML'),
+                            reply_markup=message_data.get('reply_markup')
+                        )
+                except Exception as e:
+                    logger.error(f"Failed to send message to {chat_id}: {e}")
                 
             await asyncio.sleep(0.5)
             queue.task_done()

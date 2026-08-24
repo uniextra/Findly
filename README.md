@@ -1,11 +1,16 @@
-# Findly 🚀
+# Findly 🕵️‍♂️
 
 Findly (formerly Wallatrack) is a high-efficiency Telegram bot and Web Dashboard that helps you track items on **Wallapop** and **Vinted** simultaneously. It alerts you via Telegram the moment a new item matching your criteria is posted.
+
+![Findly Web Dashboard](assets/web_interface.png)
 
 ## Features
 - **Multi-platform tracking**: Search Wallapop and Vinted.
 - **Modern Web UI**: Manage everything from a sleek Single Page Application (Dashboard, Searches, and Settings).
+- **Internationalization (i18n)**: The Web Dashboard automatically adapts to English, Spanish, French, Italian, and Portuguese based on your browser's language.
 - **Quick Add via URL**: Paste a Wallapop or Vinted URL directly in the Web UI or Telegram to auto-fill the search criteria.
+- **Easy Telegram Group Pairing**: Connect your Telegram groups to the bot securely with a 5-digit pairing code directly from the Web UI (`/link CODE`), eliminating the need to manually lookup Chat IDs.
+- **Unified Broadcasting**: New item alerts are automatically broadcasted to all authorized chats, ensuring your entire team stays updated regardless of who added the tracking query.
 - **Anti-ban Resilience (No Proxies needed by default)**:
   - **User-Agent Spoofing**: Automatic rotation of real browser user-agents.
   - **Cookie Warming**: Background ghost requests to bypass initial security checks.
@@ -56,13 +61,14 @@ docker-compose up -d --build
 
 1. Navigate to the Web UI at `http://localhost:8000` (or your server's IP/custom port).
 2. Go to the **Settings** tab.
-3. Configure your **Telegram Bot Token** and **Allowed Chat IDs**.
-4. Click **Save & Restart**. The bot will seamlessly reload with your new settings.
+3. Configure your **Telegram Bot Token**.
+4. Use the **Add Chat ID** wizard to easily authorize your private chat or Telegram groups using a pairing code.
+5. Click **Save Settings**. The bot will seamlessly reload with your new settings.
 
 ## Usage
 
 **Via Web UI (Recommended)**:
-Navigate to your dashboard to view statistics, add new tracking queries (using the non-linear sliders or URL pasting), trigger manual refreshes, and review the history of all seen items.
+Navigate to your dashboard to view statistics, add new tracking queries (using the non-linear sliders or URL pasting), trigger manual refreshes, and manage your settings.
 
 **Via Telegram**:
 - `/start` to see the welcome message.
