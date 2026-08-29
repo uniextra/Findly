@@ -84,8 +84,19 @@ async def search_location(q: str):
 
 @app.get("/api/settings")
 def get_settings():
+    import os
+    from database import SessionLocal, AppSetting
+    db = SessionLocal()
+    try:
+        db_token_setting = db.query(AppSetting).filter(AppSetting.key == "telegram_token").first()
+        db_token = db_token_setting.value if db_token_setting else ""
+    finally:
+        db.close()
+        
     return {
         "telegram_token": get_setting("telegram_token", ""),
+        "env_telegram_token": os.environ.get("TELEGRAM_TOKEN", ""),
+        "db_telegram_token": db_token,
         "allowed_chat_ids": get_setting("allowed_chat_ids", ""),
         "region": get_setting("region", "es"),
         "location": get_setting("location", ""),
