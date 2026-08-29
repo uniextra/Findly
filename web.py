@@ -131,7 +131,7 @@ async def geocode_location(location_name: str, country_code: str = "es"):
     return None, None
 
 @app.post("/api/settings")
-def save_settings(settings: List[SettingUpdate], background_tasks: BackgroundTasks):
+async def save_settings(settings: List[SettingUpdate], background_tasks: BackgroundTasks):
     db = SessionLocal()
     try:
         for s in settings:
@@ -144,7 +144,7 @@ def save_settings(settings: List[SettingUpdate], background_tasks: BackgroundTas
             if s.key == "location" and s.value.strip():
                 # Geocode and save lat/lon
                 region_setting = next((x.value for x in settings if x.key == "region"), "es")
-                lat, lon = geocode_location(s.value, region_setting)
+                lat, lon = await geocode_location(s.value, region_setting)
                 if lat and lon:
                     db_lat = db.query(AppSetting).filter(AppSetting.key == "latitude").first()
                     if db_lat: db_lat.value = str(lat)
