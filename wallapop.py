@@ -25,11 +25,21 @@ def search_items(keywords: str, min_price: Optional[float] = None, max_price: Op
         
     url = f"{BASE_URL}/search?"
     
+    try:
+        lat = float(get_setting("latitude", "40.4165") or "40.4165")
+    except (ValueError, TypeError):
+        lat = 40.4165
+
+    try:
+        lon = float(get_setting("longitude", "-3.70256") or "-3.70256")
+    except (ValueError, TypeError):
+        lon = -3.70256
+
     params = {
         "keywords": keywords,
         "order_by": "newest",
-        "latitude": float(get_setting("latitude", "40.4165")),
-        "longitude": float(get_setting("longitude", "-3.70256")),
+        "latitude": lat,
+        "longitude": lon,
         "country_code": region.upper(),
         "time_filter": "today",
         "source": "search_box"
@@ -56,89 +66,99 @@ def search_items(keywords: str, min_price: Optional[float] = None, max_price: Op
         if mapped:
             params["condition"] = mapped
 
+    import time
     session = requests.Session()
     retries = 0
     max_retries = 3
 
-    while retries < max_retries:
-        try:
-            headers = {
-                "User-Agent": random.choice(USER_AGENTS),
-                "Accept": "*/*",
-                "Accept-Encoding": "gzip, deflate, br, zstd, identity",
-                "Accept-Language": "en",
-                "Connection": "keep-alive",
-                "Host": "api.wallapop.com",
-                "Origin": f"https://{region}.wallapop.com",
-                "Referer": f"https://{region}.wallapop.com/",
-                "X-DeviceOS": "0"
-            }
-            session.headers.update(headers)
-            
-            logger.info(f"Searching Wallapop (Attempt {retries+1}/{max_retries}): {keywords}")
-            response = session.get(url, params=params, timeout=10)
-            
-            if response.status_code in (401, 403, 404):
-                logger.warning(f"Wallapop API returned {response.status_code}. Resetting session.")
-                session.cookies.clear()
-                # Dummy request to regenerate basic cookies/fingerprint
-                session.get(f"https://{region}.wallapop.com/", timeout=10)
-                retries += 1
-                continue
-                
-            response.raise_for_status()
-            
-            data = response.json()
-            
-            # Parse new response structure
+    try:
+        while retries < max_retries:
             try:
-                items = data.get("data", {}).get("section", {}).get("payload", {}).get("items", [])[:50]
-            except AttributeError:
-                items = []
-            
-            results = []
-            for item in items:
-                # Extract relevant fields
+                headers = {
+                    "User-Agent": random.choice(USER_AGENTS),
+                    "Accept": "*/*",
+                    "Accept-Encoding": "gzip, deflate, br, zstd, identity",
+                    "Accept-Language": "en",
+                    "Connection": "keep-alive",
+                    "Host": "api.wallapop.com",
+                    "Origin": f"https://{region}.wallapop.com",
+                    "Referer": f"https://{region}.wallapop.com/",
+                    "X-DeviceOS": "0"
+                }
+                session.headers.update(headers)
+                
+                logger.info(f"Searching Wallapop (Attempt {retries+1}/{max_retries}): {keywords}")
+                response = session.get(url, params=params, timeout=10)
+                
+                if response.status_code in (401, 403, 404):
+                    logger.warning(f"Wallapop API returned {response.status_code}. Resetting session.")
+                    session.cookies.clear()
+                    # Dummy request to regenerate basic cookies/fingerprint
+                    try:
+                        session.get(f"https://{region}.wallapop.com/", timeout=10)
+                    except requests.RequestException:
+                        pass
+                    retries += 1
+                    time.sleep(1.0 * retries)
+                    continue
+                    
+                response.raise_for_status()
+                
+                data = response.json()
+                
+                # Parse new response structure
                 try:
-                    item_id = item.get("id")
-                    title = item.get("title")
-                    
-                    # Price is now a dict: {'amount': 250.0, 'currency': 'EUR'}
-                    price_data = item.get("price", {})
-                    if isinstance(price_data, dict):
-                        price = price_data.get("amount")
-                        currency = price_data.get("currency", "EUR")
-                    else:
-                        price = price_data
-                        currency = "EUR"
+                    items = data.get("data", {}).get("section", {}).get("payload", {}).get("items", [])[:50]
+                except AttributeError:
+                    items = []
+                
+                results = []
+                for item in items:
+                    # Extract relevant fields
+                    try:
+                        item_id = item.get("id")
+                        title = item.get("title")
+                        
+                        # Price is now a dict: {'amount': 250.0, 'currency': 'EUR'}
+                        price_data = item.get("price", {})
+                        if isinstance(price_data, dict):
+                            price = price_data.get("amount")
+                            currency = price_data.get("currency", "EUR")
+                        else:
+                            price = price_data
+                            currency = "EUR"
 
-                    url_slug = item.get("web_slug")
-                    
-                    # Images is a list of dicts
-                    images = item.get("images", [])
-                    image = None
-                    if images and isinstance(images, list):
-                        image = images[0].get("urls", {}).get("small")
-                    
-                    if item_id and title:
-                        results.append({
-                            "id": str(item_id),
-                            "title": title,
-                            "price": price,
-                            "currency": currency,
-                            "url": f"https://{region}.wallapop.com/item/{url_slug}" if url_slug else None,
-                            "image": image,
-                            "platform": "Wallapop"
-                        })
-                except Exception as e:
-                    logger.error(f"Error parsing Wallapop item: {e}")
-                    
-            return results
+                        url_slug = item.get("web_slug")
+                        item_url = f"https://{region}.wallapop.com/item/{url_slug}" if url_slug else f"https://{region}.wallapop.com/item/{item_id}"
+                        
+                        # Images is a list of dicts
+                        images = item.get("images", [])
+                        image = None
+                        if images and isinstance(images, list):
+                            image = images[0].get("urls", {}).get("small")
+                        
+                        if item_id and title:
+                            results.append({
+                                "id": str(item_id),
+                                "title": title,
+                                "price": price,
+                                "currency": currency,
+                                "url": item_url,
+                                "image": image,
+                                "platform": "Wallapop"
+                            })
+                    except Exception as e:
+                        logger.error(f"Error parsing Wallapop item: {e}")
+                        
+                return results
 
-        except requests.RequestException as e:
-            logger.error(f"Error searching Wallapop: {e}")
-            session.cookies.clear()
-            retries += 1
-            
-    logger.error("Max retries reached for Wallapop search.")
-    return []
+            except requests.RequestException as e:
+                logger.error(f"Error searching Wallapop: {e}")
+                session.cookies.clear()
+                retries += 1
+                time.sleep(1.0 * retries)
+                
+        logger.error("Max retries reached for Wallapop search.")
+        return []
+    finally:
+        session.close()

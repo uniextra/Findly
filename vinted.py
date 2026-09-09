@@ -45,92 +45,100 @@ def search_vinted(keywords: str, min_price: Optional[float] = None, max_price: O
         if mapped:
             params["status_ids"] = mapped
 
+    import time
     session = requests.Session()
     retries = 0
     max_retries = 3
 
-    while retries < max_retries:
-        try:
-            # Rotate user agent
-            headers = {
-                "User-Agent": random.choice(USER_AGENTS),
-                "Accept": "application/json, text/plain, */*",
-                "Accept-Language": f"{region}-{region.upper()},en;q=0.9",
-                "Host": f"www.vinted.{domain}"
-            }
-            session.headers.update(headers)
-            
-            # Fetch cookies if we don't have them
-            if 'access_token_web' not in [c.name for c in session.cookies]:
-                session.get(f"https://www.vinted.{domain}/", timeout=10)
-            
-            logger.info(f"Searching Vinted (Attempt {retries+1}/{max_retries}): {keywords}")
-            response = session.get(url, params=params, timeout=10)
-            
-            if response.status_code in (401, 403, 404):
-                logger.warning(f"Vinted API returned {response.status_code}. Resetting session.")
+    try:
+        while retries < max_retries:
+            try:
+                # Rotate user agent
+                headers = {
+                    "User-Agent": random.choice(USER_AGENTS),
+                    "Accept": "application/json, text/plain, */*",
+                    "Accept-Language": f"{region}-{region.upper()},en;q=0.9",
+                    "Host": f"www.vinted.{domain}"
+                }
+                session.headers.update(headers)
+                
+                # Fetch cookies if we don't have them
+                if 'access_token_web' not in [c.name for c in session.cookies]:
+                    try:
+                        session.get(f"https://www.vinted.{domain}/", timeout=10)
+                    except requests.RequestException:
+                        pass
+                
+                logger.info(f"Searching Vinted (Attempt {retries+1}/{max_retries}): {keywords}")
+                response = session.get(url, params=params, timeout=10)
+                
+                if response.status_code in (401, 403, 404):
+                    logger.warning(f"Vinted API returned {response.status_code}. Resetting session.")
+                    session.cookies.clear()
+                    retries += 1
+                    time.sleep(1.0 * retries)
+                    continue
+                    
+                response.raise_for_status()
+                
+                data = response.json()
+                items = data.get("items", [])[:50]  # Hard limit to first 50 results
+                
+                results = []
+                now_ts = int(time.time())
+                
+                for item in items:
+                    try:
+                        # Filter by timestamp (less than 20 minutes old)
+                        photo = item.get("photo") or {}
+                        if isinstance(photo, dict):
+                            high_res = photo.get("high_resolution") or {}
+                            if isinstance(high_res, dict):
+                                timestamp = high_res.get("timestamp")
+                                if timestamp and (now_ts - int(timestamp)) > 20 * 60:
+                                    continue # Too old, skip it
+                        
+                        item_id = item.get("id")
+                        title = item.get("title")
+                        
+                        price_data = item.get("price")
+                        if isinstance(price_data, dict):
+                            price = float(price_data.get("amount", 0))
+                            currency = price_data.get("currency_code", "EUR")
+                        else:
+                            # Fallback just in case Vinted changes back to string/float
+                            price = float(price_data or 0)
+                            currency = item.get("currency", "EUR")
+                        
+                        url_slug = item.get("url")
+                        
+                        images = item.get("photos", [])
+                        image = images[0].get("url") if images and isinstance(images, list) else None
+                        if not image and isinstance(photo, dict):
+                            image = photo.get("url")
+                        
+                        if item_id and title:
+                            results.append({
+                                "id": f"vinted_{item_id}",
+                                "title": title,
+                                "price": price,
+                                "currency": currency,
+                                "url": url_slug,
+                                "image": image,
+                                "platform": "Vinted"
+                            })
+                    except Exception as e:
+                        logger.error(f"Error parsing Vinted item: {e}")
+                        
+                return results
+
+            except requests.RequestException as e:
+                logger.error(f"Error searching Vinted: {e}")
                 session.cookies.clear()
                 retries += 1
-                continue
+                time.sleep(1.0 * retries)
                 
-            response.raise_for_status()
-            
-            data = response.json()
-            items = data.get("items", [])[:50]  # Hard limit to first 50 results
-            
-            import time
-            results = []
-            now_ts = int(time.time())
-            
-            for item in items:
-                try:
-                    # Filter by timestamp (less than 20 minutes old)
-                    photo = item.get("photo", {})
-                    if photo:
-                        high_res = photo.get("high_resolution", {})
-                        timestamp = high_res.get("timestamp")
-                        if timestamp:
-                            if (now_ts - int(timestamp)) > 20 * 60:
-                                continue # Too old, skip it
-                    
-                    item_id = item.get("id")
-                    title = item.get("title")
-                    
-                    price_data = item.get("price")
-                    if isinstance(price_data, dict):
-                        price = float(price_data.get("amount", 0))
-                        currency = price_data.get("currency_code", "EUR")
-                    else:
-                        # Fallback just in case Vinted changes back to string/float
-                        price = float(price_data or 0)
-                        currency = item.get("currency", "EUR")
-                    
-                    url_slug = item.get("url")
-                    
-                    images = item.get("photos", [])
-                    image = images[0].get("url") if images else None
-                    if not image and photo:
-                        image = photo.get("url")
-                    
-                    if item_id and title:
-                        results.append({
-                            "id": f"vinted_{item_id}",
-                            "title": title,
-                            "price": price,
-                            "currency": currency,
-                            "url": url_slug,
-                            "image": image,
-                            "platform": "Vinted"
-                        })
-                except Exception as e:
-                    logger.error(f"Error parsing Vinted item: {e}")
-                    
-            return results
-
-        except requests.RequestException as e:
-            logger.error(f"Error searching Vinted: {e}")
-            session.cookies.clear()
-            retries += 1
-            
-    logger.error("Max retries reached for Vinted search.")
-    return []
+        logger.error("Max retries reached for Vinted search.")
+        return []
+    finally:
+        session.close()

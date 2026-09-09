@@ -53,44 +53,46 @@ class AppSetting(Base):
 def init_db():
     Base.metadata.create_all(bind=engine)
     
-    # Simple migration to add distance_in_km if it doesn't exist
     from sqlalchemy import text
     with engine.connect() as conn:
         try:
-            conn.execute(text("ALTER TABLE searches ADD COLUMN distance_in_km INTEGER"))
-            print("Added distance_in_km column to searches table")
-        except Exception as e:
-            print(f"Migration error: {e}")
+            # Check existing columns in searches
+            res_searches = conn.execute(text("PRAGMA table_info(searches)"))
+            search_cols = {row[1] for row in res_searches}
 
-        # Migration to add platform column
-        try:
-            conn.execute(text("ALTER TABLE searches ADD COLUMN platform VARCHAR DEFAULT 'both'"))
-            print("Added platform column to searches table")
-        except Exception as e:
-            print(f"Migration error: {e}")
-            
-        # Migration to add last_checked_at column
-        try:
-            conn.execute(text("ALTER TABLE searches ADD COLUMN last_checked_at DATETIME"))
-            print("Added last_checked_at column to searches table")
-        except Exception as e:
-            print(f"Migration error: {e}")
+            if "distance_in_km" not in search_cols:
+                conn.execute(text("ALTER TABLE searches ADD COLUMN distance_in_km INTEGER"))
+                print("Added distance_in_km column to searches table")
 
-        # Migration to add condition column
-        try:
-            conn.execute(text("ALTER TABLE searches ADD COLUMN condition VARCHAR"))
-            print("Added condition column to searches table")
-        except Exception as e:
-            print(f"Migration error (condition): {e}")
+            if "platform" not in search_cols:
+                conn.execute(text("ALTER TABLE searches ADD COLUMN platform VARCHAR DEFAULT 'both'"))
+                print("Added platform column to searches table")
+                
+            if "last_checked_at" not in search_cols:
+                conn.execute(text("ALTER TABLE searches ADD COLUMN last_checked_at DATETIME"))
+                print("Added last_checked_at column to searches table")
 
-        # Migrations for seen_items
-        try:
-            conn.execute(text("ALTER TABLE seen_items ADD COLUMN title VARCHAR"))
-            conn.execute(text("ALTER TABLE seen_items ADD COLUMN price FLOAT"))
-            conn.execute(text("ALTER TABLE seen_items ADD COLUMN url VARCHAR"))
-            print("Added title, price, url columns to seen_items table")
+            if "condition" not in search_cols:
+                conn.execute(text("ALTER TABLE searches ADD COLUMN condition VARCHAR"))
+                print("Added condition column to searches table")
+
+            # Check existing columns in seen_items
+            res_seen = conn.execute(text("PRAGMA table_info(seen_items)"))
+            seen_cols = {row[1] for row in res_seen}
+
+            if "title" not in seen_cols:
+                conn.execute(text("ALTER TABLE seen_items ADD COLUMN title VARCHAR"))
+                print("Added title column to seen_items table")
+
+            if "price" not in seen_cols:
+                conn.execute(text("ALTER TABLE seen_items ADD COLUMN price FLOAT"))
+                print("Added price column to seen_items table")
+
+            if "url" not in seen_cols:
+                conn.execute(text("ALTER TABLE seen_items ADD COLUMN url VARCHAR"))
+                print("Added url column to seen_items table")
         except Exception as e:
-            print(f"Migration error: {e}")
+            print(f"Migration check error: {e}")
 
 def get_setting(key: str, default: str = "") -> str:
     db = SessionLocal()
@@ -110,7 +112,7 @@ def get_db():
     finally:
         db.close()
 
-def cleanup_old_items(days_old=10):
+def cleanup_old_items(days_old=90):
     from datetime import timedelta
     import logging
     logger = logging.getLogger(__name__)

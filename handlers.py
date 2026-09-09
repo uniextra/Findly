@@ -75,6 +75,7 @@ async def process_add_search(update: Update, full_text: str):
     min_price = None
     max_price = None
     distance_in_km = None
+    condition = None
     platform = "both"
 
     if "http" in full_text and ("wallapop.com" in full_text or "vinted" in full_text):
@@ -101,6 +102,10 @@ async def process_add_search(update: Update, full_text: str):
                 if "price_to" in params:
                     try: max_price = float(params["price_to"][0])
                     except ValueError: pass
+                if "status_ids" in params:
+                    raw_status = params["status_ids"][0]
+                    v_rev_map = {"6,1": "new", "1": "new", "6": "new", "2": "mint", "3": "good", "4": "fair"}
+                    condition = v_rev_map.get(raw_status)
             else:
                 platform = "wallapop"
                 if "keywords" not in params:
@@ -120,6 +125,11 @@ async def process_add_search(update: Update, full_text: str):
                 if "distance_in_km" in params:
                     try: distance_in_km = int(params["distance_in_km"][0])
                     except ValueError: pass
+
+                if "condition" in params:
+                    raw_cond = params["condition"][0]
+                    w_rev_map = {"new": "new", "as_good_as_new": "mint", "good": "good", "fair": "fair", "has_given_it_all": "poor"}
+                    condition = w_rev_map.get(raw_cond)
                     
         except Exception as e:
             await update.message.reply_text(t("url_error", region, e=e))
@@ -158,6 +168,7 @@ async def process_add_search(update: Update, full_text: str):
             min_price=min_price,
             max_price=max_price,
             distance_in_km=distance_in_km,
+            condition=condition,
             platform=platform
         )
         db.add(search)

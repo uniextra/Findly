@@ -40,7 +40,14 @@ async def post_init(application: Application):
     # Send startup message
     allowed_chats = get_setting("allowed_chat_ids", "")
     if allowed_chats:
-        chat_ids = [int(cid.strip("'\" ")) for cid in allowed_chats.split(',') if cid.strip()]
+        chat_ids = []
+        for cid in allowed_chats.split(','):
+            cleaned = cid.strip("'\" ")
+            try:
+                chat_ids.append(int(cleaned))
+            except ValueError:
+                logger.warning(f"Ignored invalid chat_id in settings: {cleaned}")
+
         for chat_id in chat_ids:
             try:
                 region = get_setting("region", "es")

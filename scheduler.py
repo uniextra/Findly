@@ -29,13 +29,22 @@ async def telegram_notifier_loop(application: Application, queue: asyncio.Queue)
             for chat_id in chat_ids:
                 try:
                     if msg_type == 'photo':
-                        await application.bot.send_photo(
-                            chat_id=chat_id,
-                            photo=message_data.get('photo'),
-                            caption=message_data.get('caption'),
-                            parse_mode=message_data.get('parse_mode', 'HTML'),
-                            reply_markup=message_data.get('reply_markup')
-                        )
+                        try:
+                            await application.bot.send_photo(
+                                chat_id=chat_id,
+                                photo=message_data.get('photo'),
+                                caption=message_data.get('caption'),
+                                parse_mode=message_data.get('parse_mode', 'HTML'),
+                                reply_markup=message_data.get('reply_markup')
+                            )
+                        except Exception as pe:
+                            logger.warning(f"Failed to send photo to {chat_id}, falling back to text: {pe}")
+                            await application.bot.send_message(
+                                chat_id=chat_id,
+                                text=message_data.get('caption') or message_data.get('text', ''),
+                                parse_mode=message_data.get('parse_mode', 'HTML'),
+                                reply_markup=message_data.get('reply_markup')
+                            )
                     elif msg_type == 'message':
                         await application.bot.send_message(
                             chat_id=chat_id,
@@ -71,16 +80,20 @@ async def check_single_search(search_id: int, queue: asyncio.Queue, platform_ove
         target_platform = platform_override or search.platform or "both"
         
         if target_platform in ["wallapop", "both"]:
-            items.extend(search_items(search.keywords, search.min_price, search.max_price, search.distance_in_km, search.condition))
+            w_items = await asyncio.to_thread(search_items, search.keywords, search.min_price, search.max_price, search.distance_in_km, search.condition)
+            items.extend(w_items)
         
         if target_platform in ["vinted", "both"]:
-            items.extend(search_vinted(search.keywords, search.min_price, search.max_price, search.condition))
+            v_items = await asyncio.to_thread(search_vinted, search.keywords, search.min_price, search.max_price, search.condition)
+            items.extend(v_items)
         
         new_items_count = 0
         max_items_to_notify = 10
         
         for item in items:
-            item_id = item["id"]
+            item_id = item.get("id")
+            if not item_id:
+                continue
             exists = db.query(SeenItem).filter(SeenItem.wallapop_id == str(item_id), SeenItem.search_id == search.id).first()
             if exists:
                 continue
@@ -94,7 +107,6 @@ async def check_single_search(search_id: int, queue: asyncio.Queue, platform_ove
                 url=item.get('url')
             )
             db.add(seen)
-            db.commit()
 
             if new_items_count <= max_items_to_notify:
                 plat_name = item.get('platform', 'Wallapop')
@@ -195,19 +207,22 @@ async def platform_scheduler_loop(queue: asyncio.Queue, platform: str):
         except ValueError:
             interval_mins = 5
             
+        search_ids = []
         db = SessionLocal()
         try:
             # Get searches that include this platform or 'both'
-            searches = db.query(Search).filter(Search.platform.in_([platform, "both"])).all()
-            for search in searches:
-                await check_single_search(search.id, queue, platform_override=platform)
-                await asyncio.sleep(15) # Wait 15s between each search to avoid flooding
+            searches = db.query(Search.id).filter(Search.platform.in_([platform, "both"])).all()
+            search_ids = [s[0] for s in searches]
         except Exception as e:
-            logger.error(f"Unexpected error in {platform} scheduler: {e}")
+            logger.error(f"Unexpected error in {platform} scheduler querying searches: {e}")
         finally:
             db.close()
+
+        for s_id in search_ids:
+            await check_single_search(s_id, queue, platform_override=platform)
+            await asyncio.sleep(15)  # Wait 15s between each search to avoid flooding
             
         # Add random jitter between -30s and +30s
         wait_time = (interval_mins * 60) + random.uniform(-30, 30)
         logger.info(f"Next check for {platform} in {wait_time/60:.1f} minutes")
-        await asyncio.sleep(max(wait_time, 60)) # Ensure at least 60s
+        await asyncio.sleep(max(wait_time, 60))  # Ensure at least 60s

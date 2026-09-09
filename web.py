@@ -204,6 +204,7 @@ def get_searches():
                 "min_price": s.min_price,
                 "max_price": s.max_price,
                 "distance_in_km": s.distance_in_km,
+                "condition": s.condition,
                 "platform": s.platform,
                 "chat_id": s.chat_id,
                 "created_at": s.created_at.isoformat() if s.created_at else None,
@@ -232,6 +233,7 @@ def add_search(search: SearchCreate):
             min_price=search.min_price,
             max_price=search.max_price,
             distance_in_km=search.distance_in_km,
+            condition=search.condition,
             platform=search.platform
         )
         db.add(new_search)
@@ -256,6 +258,7 @@ def update_search(search_id: int, search: SearchCreate):
         existing.min_price = search.min_price
         existing.max_price = search.max_price
         existing.distance_in_km = search.distance_in_km
+        existing.condition = search.condition
         existing.platform = search.platform
         if search.chat_id:
             existing.chat_id = search.chat_id

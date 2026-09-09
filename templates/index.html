@@ -774,6 +774,7 @@ createApp({
                 min_price: pMin > 0 ? pMin : null,
                 max_price: pMax >= 1500 ? null : pMax,
                 distance_in_km: distanceMap[formSearch.value.distance_index],
+                condition: formSearch.value.condition || null,
                 platform: platformStr
             }
 
@@ -813,6 +814,7 @@ createApp({
             formSearch.value = {
                 keywords: search.keywords,
                 distance_index: dIndex,
+                condition: search.condition || '',
                 wallapop: search.platform === 'both' || search.platform === 'wallapop',
                 vinted: search.platform === 'both' || search.platform === 'vinted'
             }
