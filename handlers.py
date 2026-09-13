@@ -1,7 +1,7 @@
 from telegram import Update
 from telegram.ext import ContextTypes
 from sqlalchemy.orm import Session
-from database import SessionLocal, Search, get_setting
+from database import SessionLocal, Search, SeenItem, get_setting
 from i18n import t
 
 def get_db_session():
