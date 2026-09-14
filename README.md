@@ -4,6 +4,11 @@ Findly (formerly Wallatrack) is a high-efficiency Telegram bot and Web Dashboard
 
 ![Findly Web Dashboard](assets/web_interface.png)
 
+<p align="center">
+  <em>Example of real-time Telegram notification with one-click unfollow action:</em><br>
+  <img src="assets/telegram_notification.png" alt="Telegram Notification Example" width="340px" />
+</p>
+
 ## Features
 - **Multi-platform tracking**: Search Wallapop and Vinted.
 - **Modern Web UI**: Manage everything from a sleek Single Page Application (Dashboard, Searches, and Settings).
@@ -67,6 +72,24 @@ docker-compose up -d --build
 4. Use the **Add Chat ID** wizard to easily authorize your private chat or Telegram groups using a pairing code.
 5. Click **Save Settings**. The bot will seamlessly reload with your new settings.
 
+### Configure Telegram Commands Menu (BotFather)
+
+To display the command suggestions menu in Telegram when typing `/`, configure them in [@BotFather](https://t.me/BotFather):
+
+1. Open [@BotFather](https://t.me/BotFather) in Telegram.
+2. Send `/mybots` and select your bot from the list.
+3. Click on **Bot Settings** &rarr; **Edit Commands**.
+   *(Alternatively, send `/setcommands` directly and select your bot).*
+4. Copy and paste the following list:
+
+```text
+start - Start the bot and show help
+add - Add tracking query (keywords, price, distance) or paste URL
+list - View your active searches
+delete - Delete an active search by ID
+link - Pair group or chat with a 5-digit code
+```
+
 ## Usage
 
 **Via Web UI (Recommended)**:
@@ -78,3 +101,4 @@ Navigate to your dashboard to view statistics, add new tracking queries (using t
 - Paste a Wallapop or Vinted URL directly in the chat to track it.
 - `/list` to view your active searches.
 - `/delete <id>` to remove a search.
+- `/link <code>` to pair a chat or group using the 5-digit code from Web UI.
