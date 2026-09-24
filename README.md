@@ -53,6 +53,8 @@ docker-compose up -d
 
 *(To change the Web UI port, change the left-side number in `ports`, e.g., `"8080:8000"`).*
 
+> **Note on Permissions**: Findly runs securely as an unprivileged user (`UID 1000`). Ensure the `./data` directory on the host has appropriate write permissions (e.g. `sudo chown -R 1000:1000 ./data` or `chmod -R 775 ./data`).
+
 ## Setup Instructions (Build from source)
 
 If you prefer to build the image yourself or modify the code:
