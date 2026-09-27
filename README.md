@@ -53,7 +53,23 @@ docker-compose up -d
 
 *(To change the Web UI port, change the left-side number in `ports`, e.g., `"8080:8000"`).*
 
-> **Note on Permissions**: Findly runs securely as an unprivileged user (`UID 1000`). Ensure the `./data` directory on the host has appropriate write permissions (e.g. `sudo chown -R 1000:1000 ./data` or `chmod -R 775 ./data`).
+> [!IMPORTANT]
+> **Permissions & Volume Troubleshooting (`readonly database`)**:
+> Findly runs securely as an unprivileged user (`UID 1000`). If you are upgrading from an older version or your `./data` directory was created by root, SQLite may report `attempt to write a readonly database`.
+> 
+> You can resolve this in one of two ways:
+> - **Option 1 (Recommended - Host permissions)**: Change ownership of the data directory to UID 1000 on your server:
+>   ```bash
+>   sudo chown -R 1000:1000 ./data
+>   sudo chmod -R 775 ./data
+>   ```
+> - **Option 2 (Portainer / Compose override)**: If you cannot access the host terminal, instruct Docker to run as root by adding `user: "0:0"` to your `docker-compose.yml`:
+>   ```yaml
+>   services:
+>     findly:
+>       image: uniextra/findly:latest
+>       user: "0:0"
+>   ```
 
 ## Setup Instructions (Build from source)
 
