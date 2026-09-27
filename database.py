@@ -1,9 +1,10 @@
 import os
+import logging
 from sqlalchemy import create_engine, Column, Integer, String, Float, DateTime, ForeignKey, event
 from sqlalchemy.orm import sessionmaker, declarative_base, relationship
 from datetime import datetime
 
-
+logger = logging.getLogger(__name__)
 
 # Ensure data directory exists
 os.makedirs("data", exist_ok=True)
@@ -19,9 +20,25 @@ engine = create_engine(
 @event.listens_for(engine, "connect")
 def set_sqlite_pragma(dbapi_connection, connection_record):
     cursor = dbapi_connection.cursor()
-    cursor.execute("PRAGMA journal_mode=WAL")
-    cursor.execute("PRAGMA busy_timeout=30000")
-    cursor.close()
+    try:
+        cursor.execute("PRAGMA journal_mode=WAL")
+    except Exception as e:
+        logger.warning(
+            "Could not enable SQLite WAL mode (%s). Database file or directory may be read-only "
+            "for the current user (e.g. UID 1000 in Docker). Falling back to default journal mode. "
+            "To enable WAL mode and prevent database locks, ensure the host directory mounted to /app/data "
+            "is writable: 'sudo chown -R 1000:1000 ./data && sudo chmod -R 775 ./data'.",
+            e
+        )
+
+    try:
+        cursor.execute("PRAGMA busy_timeout=30000")
+        cursor.execute("PRAGMA synchronous=NORMAL")
+        cursor.execute("PRAGMA foreign_keys=ON")
+    except Exception as e:
+        logger.warning("Could not set SQLite pragmas: %s", e)
+    finally:
+        cursor.close()
 
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
