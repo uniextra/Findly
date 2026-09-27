@@ -62,7 +62,7 @@ async def post_init(application: Application):
 def restart_bot():
     """Restart the entire application to apply new settings"""
     logger.info("Restarting Findly...")
-    os.execv(sys.executable, ['python', 'main.py'])
+    os.execv(sys.executable, [sys.executable, 'main.py'])
 
 def main():
     # Initialize Database

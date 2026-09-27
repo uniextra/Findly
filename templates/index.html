@@ -488,7 +488,14 @@ createApp({
         });
         const stats = ref({ active_searches: 0, total_items: 0, bot_status: 'Loading...' })
         const searches = ref([])
-        const settings = ref({ telegram_token: '', allowed_chat_ids: '', region: 'es' })
+        const settings = ref({
+            telegram_token: '',
+            allowed_chat_ids: '',
+            region: 'es',
+            location: '',
+            wallapop_interval: '5',
+            vinted_interval: '5'
+        })
         const originalSettings = ref(null)
 
         const navigate = (route) => {
@@ -848,12 +855,12 @@ createApp({
 
         const saveSettings = async () => {
             const payload = [
-                { key: 'telegram_token', value: settings.value.telegram_token },
-                { key: 'allowed_chat_ids', value: settings.value.allowed_chat_ids },
-                { key: 'region', value: settings.value.region },
-                { key: 'location', value: settings.value.location },
-                { key: 'wallapop_interval', value: String(settings.value.wallapop_interval) },
-                { key: 'vinted_interval', value: String(settings.value.vinted_interval) }
+                { key: 'telegram_token', value: settings.value.telegram_token || '' },
+                { key: 'allowed_chat_ids', value: settings.value.allowed_chat_ids || '' },
+                { key: 'region', value: settings.value.region || 'es' },
+                { key: 'location', value: settings.value.location || '' },
+                { key: 'wallapop_interval', value: String(settings.value.wallapop_interval || '5') },
+                { key: 'vinted_interval', value: String(settings.value.vinted_interval || '5') }
             ]
             const res = await fetch('/api/settings', {
                 method: 'POST',
@@ -864,7 +871,12 @@ createApp({
                 alert('Settings saved. The bot will restart to apply the new settings.')
                 await fetchData()
             } else {
-                alert('Failed to save settings')
+                let msg = 'Failed to save settings'
+                try {
+                    const data = await res.json()
+                    if (data && data.detail) msg += `:\n${data.detail}`
+                } catch (_) {}
+                alert(msg)
             }
         }
 

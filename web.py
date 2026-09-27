@@ -1,11 +1,14 @@
 import os
-from fastapi import FastAPI, HTTPException, Request
+import logging
+from fastapi import FastAPI, HTTPException, Request, BackgroundTasks
 from fastapi.responses import HTMLResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
-from typing import Optional, List, Dict
+from typing import Optional, List, Dict, Any, Union
 from database import SessionLocal, Search, SeenItem, AppSetting, get_setting
 from pairing import generate_code, get_code_status
+
+logger = logging.getLogger(__name__)
 
 app = FastAPI(title="Findly Web UI")
 app.mount("/static", StaticFiles(directory="static"), name="static")
@@ -21,7 +24,7 @@ class SearchCreate(BaseModel):
 
 class SettingUpdate(BaseModel):
     key: str
-    value: str
+    value: Optional[str] = ""
 
 @app.get("/", response_class=HTMLResponse)
 def read_root():
@@ -104,11 +107,6 @@ def get_settings():
         "vinted_interval": get_setting("vinted_interval", "5")
     }
 
-from fastapi import BackgroundTasks
-
-
-import requests
-
 async def geocode_location(location_name: str, country_code: str = "es"):
     import httpx
     try:
@@ -126,46 +124,79 @@ async def geocode_location(location_name: str, country_code: str = "es"):
                 data = resp.json()
                 if data:
                     return float(data[0]["lat"]), float(data[0]["lon"])
-    except (httpx.RequestError, ValueError, KeyError, IndexError) as e:
-        print(f"Geocode location failed: {e}")
+    except Exception as e:
+        logger.warning(f"Geocode location failed for '{location_name}': {e}")
     return None, None
 
 @app.post("/api/settings")
-async def save_settings(settings: List[SettingUpdate], background_tasks: BackgroundTasks):
+async def save_settings(settings: Union[List[SettingUpdate], Dict[str, Any]], background_tasks: BackgroundTasks):
     db = SessionLocal()
     try:
-        for s in settings:
+        # Support both List[SettingUpdate] and Dict[str, Any] payloads
+        if isinstance(settings, dict):
+            items = [
+                SettingUpdate(key=k, value=str(v) if v is not None else "")
+                for k, v in settings.items()
+            ]
+        else:
+            items = settings
+
+        location_value = None
+        region_value = "es"
+
+        for s in items:
+            val = str(s.value) if s.value is not None else ""
             existing = db.query(AppSetting).filter(AppSetting.key == s.key).first()
             if existing:
-                existing.value = s.value
+                existing.value = val
             else:
-                db.add(AppSetting(key=s.key, value=s.value))
-                
-            if s.key == "location" and s.value.strip():
-                # Geocode and save lat/lon
-                region_setting = next((x.value for x in settings if x.key == "region"), "es")
-                lat, lon = await geocode_location(s.value, region_setting)
-                if lat and lon:
+                db.add(AppSetting(key=s.key, value=val))
+
+            if s.key == "location":
+                location_value = val.strip()
+            elif s.key == "region":
+                region_value = val.strip() or "es"
+
+        # Safely geocode location without aborting transaction on network/API failure
+        if location_value:
+            try:
+                lat, lon = await geocode_location(location_value, region_value)
+                if lat is not None and lon is not None:
                     db_lat = db.query(AppSetting).filter(AppSetting.key == "latitude").first()
-                    if db_lat: db_lat.value = str(lat)
-                    else: db.add(AppSetting(key="latitude", value=str(lat)))
-                    
+                    if db_lat:
+                        db_lat.value = str(lat)
+                    else:
+                        db.add(AppSetting(key="latitude", value=str(lat)))
+
                     db_lon = db.query(AppSetting).filter(AppSetting.key == "longitude").first()
-                    if db_lon: db_lon.value = str(lon)
-                    else: db.add(AppSetting(key="longitude", value=str(lon)))
+                    if db_lon:
+                        db_lon.value = str(lon)
+                    else:
+                        db.add(AppSetting(key="longitude", value=str(lon)))
+            except Exception as geo_err:
+                logger.warning(f"Failed to geocode location '{location_value}': {geo_err}")
+        elif location_value == "":
+            # Clear stored coordinates if location was emptied
+            db.query(AppSetting).filter(AppSetting.key.in_(["latitude", "longitude"])).delete(synchronize_session=False)
+
         db.commit()
-        # Trigger bot restart after response is sent
-        from main import restart_bot
-        
-        # Delay the restart slightly to ensure the network socket is flushed
-        import time
-        def delayed_restart():
-            time.sleep(1)
-            restart_bot()
-            
-        background_tasks.add_task(delayed_restart)
+
+        # Safely trigger bot restart in background after response
+        try:
+            from main import restart_bot
+            import time
+
+            def delayed_restart():
+                time.sleep(1)
+                restart_bot()
+
+            background_tasks.add_task(delayed_restart)
+        except Exception as restart_err:
+            logger.warning(f"Could not schedule bot restart: {restart_err}")
+
         return {"success": True}
     except Exception as e:
+        logger.exception("Failed to save settings: %s", e)
         db.rollback()
         raise HTTPException(status_code=500, detail=str(e))
     finally:

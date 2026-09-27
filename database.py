@@ -1,5 +1,5 @@
 import os
-from sqlalchemy import create_engine, Column, Integer, String, Float, DateTime, ForeignKey
+from sqlalchemy import create_engine, Column, Integer, String, Float, DateTime, ForeignKey, event
 from sqlalchemy.orm import sessionmaker, declarative_base, relationship
 from datetime import datetime
 
@@ -11,7 +11,18 @@ os.makedirs("data", exist_ok=True)
 DATABASE_URL = "sqlite:///data/wallatrack.db"
 
 Base = declarative_base()
-engine = create_engine(DATABASE_URL, connect_args={"check_same_thread": False})
+engine = create_engine(
+    DATABASE_URL,
+    connect_args={"check_same_thread": False, "timeout": 30}
+)
+
+@event.listens_for(engine, "connect")
+def set_sqlite_pragma(dbapi_connection, connection_record):
+    cursor = dbapi_connection.cursor()
+    cursor.execute("PRAGMA journal_mode=WAL")
+    cursor.execute("PRAGMA busy_timeout=30000")
+    cursor.close()
+
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
 class Search(Base):
@@ -98,7 +109,7 @@ def get_setting(key: str, default: str = "") -> str:
     db = SessionLocal()
     try:
         setting = db.query(AppSetting).filter(AppSetting.key == key).first()
-        if setting:
+        if setting and setting.value is not None:
             return setting.value
         # Fallback to env
         return os.environ.get(key.upper(), default)
